@@ -11,10 +11,10 @@ Artpedia is a ERC721(NFT) Exchange
 Tested on OSX Monterey 12.3.1
 
 * [python3](https://www.python.org/downloads/release/python-368/) tested with version [3.9.5](https://www.python.org/downloads/release/python-395/)
-* [nile](https://github.com/OpenZeppelin/nile) - tested with version [0.6.1](https://github.com/eth-brownie/brownie/tree/v1.17.2)
+* [nile](https://github.com/OpenZeppelin/nile) - tested with version [0.6.1](https://github.com/OpenZeppelin/nile/releases/tag/v0.6.1)
 
 
-Exchange contracts are compiled using [nile](https://github.com/OpenZeppelin/nile)
+Exchange contracts are compiled using [nile 0.6.1](https://github.com/OpenZeppelin/nile)
 
 
 ## Setup
