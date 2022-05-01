@@ -3,6 +3,7 @@ import pytest
 
 from starkware.starknet.testing.starknet import Starknet
 from pathlib import Path
+from utils import *
 
 # The path to the contract source code.
 # BASE_DIR = "/Users/jedi/Repo/practice/evm/tryout/contracts"
