@@ -10,24 +10,25 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.uint256 import Uint256, uint256_check
 
-
 @storage_var
-func ERC721_name() -> (name: felt):
+func ERC721_name() -> (name : felt):
 end
 
 @storage_var
-func ERC721_symbol() -> (symbol: felt):
+func ERC721_symbol() -> (symbol : felt):
 end
 
-func ERC721_initializer{
-    syscall_ptr : felt*,
-    pedersen_ptr : HashBuiltin*,
-    range_check_ptr
-}(
-    name: felt,
-    symbol: felt,
-): 
-    ERC721_name.write(name)
-    ERC721_symbol.write(symbol)
-    return ()
+namespace ERC721:
+    func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        name : felt, symbol : felt
+    ):
+        ERC721_name.write(name)
+        ERC721_symbol.write(symbol)
+        return ()
+    end
+
+    func name{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (name : felt):
+        let (name) = ERC721_name.read()
+        return (name)
+    end
 end
