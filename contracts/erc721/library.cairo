@@ -31,4 +31,11 @@ namespace ERC721:
         let (name) = ERC721_name.read()
         return (name)
     end
+
+    func symbol{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        symbol : felt
+    ):
+        let (symbol) = ERC721_symbol.read()
+        return (symbol)
+    end
 end

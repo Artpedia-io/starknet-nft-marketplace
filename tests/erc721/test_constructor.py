@@ -36,3 +36,6 @@ async def bob():
 async def test_constructor(erc721):
     execution_info = await erc721.name().invoke()
     assert execution_info.result.name == NAME
+
+    execution_info = await erc721.symbol().invoke()
+    assert execution_info.result.symbol == SYMBOL
