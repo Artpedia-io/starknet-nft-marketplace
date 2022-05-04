@@ -30,3 +30,19 @@ func symbol{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}()
     let (symbol) = ERC721.symbol()
     return (symbol)
 end
+
+@external
+func mint{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    to : felt, token_id : Uint256
+) -> ():
+    ERC721.mint(to, token_id)
+    return ()
+end
+
+@view
+func ownerOf{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+) -> (owner : felt):
+    let (owner) = ERC721.ownerOf(token_id)
+    return (owner)
+end

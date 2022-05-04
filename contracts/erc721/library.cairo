@@ -18,6 +18,10 @@ end
 func ERC721_symbol() -> (symbol : felt):
 end
 
+@storage_var
+func ERC721_id_to_owner(token_id : Uint256) -> (owner : felt):
+end
+
 namespace ERC721:
     func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         name : felt, symbol : felt
@@ -37,5 +41,19 @@ namespace ERC721:
     ):
         let (symbol) = ERC721_symbol.read()
         return (symbol)
+    end
+
+    func mint{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        to : felt, token_id : Uint256
+    ) -> ():
+        ERC721_id_to_owner.write(token_id, to)
+        return ()
+    end
+
+    func ownerOf{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id : Uint256
+    ) -> (owner : felt):
+        let (owner) = ERC721_id_to_owner.read(token_id)
+        return (owner)
     end
 end
