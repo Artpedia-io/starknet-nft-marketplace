@@ -29,7 +29,7 @@ def contract_path(name):
     if name.startswith("tests/"):
         return str(_root / name)
     else:
-        return str(_root / "contracts" / name)
+        return str(_root / "src" / name)
 
 
 def str_to_felt(text):
