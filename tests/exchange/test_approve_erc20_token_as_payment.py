@@ -49,7 +49,7 @@ ZERO_AMOUNT = to_uint(0)
 
 @pytest.mark.asyncio
 async def test_remove_approved_tokens_by_admin(factory):
-    artpedia, milady, dai, ust, alice, bob, charlie = factory
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = factory
     response = await signer.send_transaction(
         alice,
         artpedia.contract_address,
@@ -72,7 +72,7 @@ async def test_remove_approved_tokens_by_admin(factory):
 
 @pytest.mark.asyncio
 async def test_positive_add_approval_to_new_erc20_token_by_admin(factory):
-    artpedia, milady, dai, ust, alice, bob, charlie = factory
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = factory
     response = await signer.send_transaction(
         alice,
         artpedia.contract_address,
@@ -95,7 +95,7 @@ async def test_positive_add_approval_to_new_erc20_token_by_admin(factory):
 
 @pytest.mark.asyncio
 async def test_negative_remove_approved_tokens_by_non_admin(factory):
-    artpedia, milady, dai, ust, alice, bob, charlie = factory
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = factory
 
     await assert_revert(
         signer.send_transaction(
@@ -110,7 +110,7 @@ async def test_negative_remove_approved_tokens_by_non_admin(factory):
 
 @pytest.mark.asyncio
 async def test_negative_approve_token_token_have_the_same_approval(factory):
-    artpedia, milady, dai, ust, alice, bob, charlie = factory
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = factory
     await assert_revert(
         signer.send_transaction(
             alice,

@@ -48,13 +48,16 @@ ZERO_AMOUNT = to_uint(0)
 
 
 @pytest.mark.asyncio
-async def test_positive_delist_item_by_owner(milady_0_is_listed_by_bob):
-    artpedia, milady, dai, ust, alice, bob, charlie = milady_0_is_listed_by_bob
+async def test_positive_delist_item_by_owner(tubbycats_0_is_listed_by_bob):
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = tubbycats_0_is_listed_by_bob
     tx_exec_info = await signer.send_transaction(
-        bob, artpedia.contract_address, "delisting", [milady.contract_address, *TOKEN]
+        bob,
+        artpedia.contract_address,
+        "delisting",
+        [tubbycats.contract_address, *TOKEN],
     )
     response = await artpedia.check_listed_items(
-        milady.contract_address, TOKEN
+        tubbycats.contract_address, TOKEN
     ).invoke()
     assert response.result.is_on_sale == 0
     assert response.result.payment_token == 0
@@ -64,18 +67,24 @@ async def test_positive_delist_item_by_owner(milady_0_is_listed_by_bob):
         tx_exec_info=tx_exec_info,
         from_address=artpedia.contract_address,
         name="Listing",
-        data=[bob.contract_address, milady.contract_address, *TOKEN, 0, *ZERO_AMOUNT],
+        data=[
+            bob.contract_address,
+            tubbycats.contract_address,
+            *TOKEN,
+            0,
+            *ZERO_AMOUNT,
+        ],
     )
 
 
 @pytest.mark.asyncio
-async def test_positive_delist_item_by_operator(milady_0_is_listed_by_bob):
-    artpedia, milady, dai, ust, alice, bob, charlie = milady_0_is_listed_by_bob
+async def test_positive_delist_item_by_operator(tubbycats_0_is_listed_by_bob):
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = tubbycats_0_is_listed_by_bob
 
     # delegate bob's token to charlie
     await signer.send_transaction(
         bob,
-        milady.contract_address,
+        tubbycats.contract_address,
         "setApprovalForAll",
         [charlie.contract_address, TRUE],
     )
@@ -84,11 +93,11 @@ async def test_positive_delist_item_by_operator(milady_0_is_listed_by_bob):
         charlie,
         artpedia.contract_address,
         "delisting",
-        [milady.contract_address, *TOKEN],
+        [tubbycats.contract_address, *TOKEN],
     )
 
     response = await artpedia.check_listed_items(
-        milady.contract_address, TOKEN
+        tubbycats.contract_address, TOKEN
     ).invoke()
     assert response.result.is_on_sale == 0
     assert response.result.payment_token == 0
@@ -100,7 +109,7 @@ async def test_positive_delist_item_by_operator(milady_0_is_listed_by_bob):
         name="Listing",
         data=[
             charlie.contract_address,
-            milady.contract_address,
+            tubbycats.contract_address,
             *TOKEN,
             0,
             *ZERO_AMOUNT,
@@ -109,15 +118,15 @@ async def test_positive_delist_item_by_operator(milady_0_is_listed_by_bob):
 
 
 @pytest.mark.asyncio
-async def test_delist_by_non_operator(milady_0_is_listed_by_bob):
-    artpedia, milady, dai, ust, alice, bob, charlie = milady_0_is_listed_by_bob
+async def test_delist_by_non_operator(tubbycats_0_is_listed_by_bob):
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = tubbycats_0_is_listed_by_bob
 
     await assert_revert(
         signer.send_transaction(
             alice,
             artpedia.contract_address,
             "delisting",
-            [milady.contract_address, *TOKEN],
+            [tubbycats.contract_address, *TOKEN],
         ),
         reverted_with="ArtpediaExchange: caller is not owner nor approved(including operators)",
     )
@@ -127,22 +136,22 @@ async def test_delist_by_non_operator(milady_0_is_listed_by_bob):
             charlie,
             artpedia.contract_address,
             "delisting",
-            [milady.contract_address, *TOKEN],
+            [tubbycats.contract_address, *TOKEN],
         ),
         reverted_with="ArtpediaExchange: caller is not owner nor approved(including operators)",
     )
 
 
 @pytest.mark.asyncio
-async def test_negative_delist_unlisted_item(milady_minted_to_bob):
-    artpedia, milady, dai, ust, alice, bob, charlie = milady_minted_to_bob
+async def test_negative_delist_unlisted_item(tubbycats_minted_to_bob):
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = tubbycats_minted_to_bob
 
     await assert_revert(
         signer.send_transaction(
             bob,
             artpedia.contract_address,
             "delisting",
-            [milady.contract_address, *TOKEN],
+            [tubbycats.contract_address, *TOKEN],
         ),
         reverted_with="ArtpediaExchange: item not listed",
     )

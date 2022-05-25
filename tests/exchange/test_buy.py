@@ -49,30 +49,30 @@ ZERO_AMOUNT = to_uint(0)
 
 
 @pytest.mark.asyncio
-async def test_negative_buyer_is_owner(milady_0_is_listed_by_bob):
-    artpedia, milady, dai, ust, alice, bob, charlie = milady_0_is_listed_by_bob
+async def test_negative_buyer_is_owner(tubbycats_0_is_listed_by_bob):
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = tubbycats_0_is_listed_by_bob
 
     await assert_revert(
         signer.send_transaction(
             bob,
             artpedia.contract_address,
             "buy",
-            [milady.contract_address, *TOKEN, len(DATA), *DATA],
+            [tubbycats.contract_address, *TOKEN, len(DATA), *DATA],
         ),
         reverted_with="ArtpediaExchange: caller is ERC-721 owner",
     )
 
 
 @pytest.mark.asyncio
-async def test_negative_buy_unlisted_item(milady_0_is_listed_by_bob):
-    artpedia, milady, dai, ust, alice, bob, charlie = milady_0_is_listed_by_bob
+async def test_negative_buy_unlisted_item(tubbycats_0_is_listed_by_bob):
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = tubbycats_0_is_listed_by_bob
 
     await assert_revert(
         signer.send_transaction(
             charlie,
             artpedia.contract_address,
             "buy",
-            [milady.contract_address, *TOKEN1, len(DATA), *DATA],
+            [tubbycats.contract_address, *TOKEN1, len(DATA), *DATA],
         ),
         reverted_with="ArtpediaExchange: item not listed",
     )
@@ -82,13 +82,13 @@ async def test_negative_buy_unlisted_item(milady_0_is_listed_by_bob):
 async def test_negative_insufficient_allowance_while_buying(
     send_dai_to_bob_and_charlie,
 ):
-    artpedia, milady, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
     await assert_revert(
         signer.send_transaction(
             charlie,
             artpedia.contract_address,
             "buy",
-            [milady.contract_address, *TOKEN, len(DATA), *DATA],
+            [tubbycats.contract_address, *TOKEN, len(DATA), *DATA],
         ),
         reverted_with="ERC20: insufficient allowance",
     )
@@ -96,7 +96,7 @@ async def test_negative_insufficient_allowance_while_buying(
 
 @pytest.mark.asyncio
 async def test_negative_not_enough_balance_while_buying(send_dai_to_bob_and_charlie):
-    artpedia, milady, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
 
     await signer.send_transaction(
         alice,
@@ -110,7 +110,7 @@ async def test_negative_not_enough_balance_while_buying(send_dai_to_bob_and_char
             alice,
             artpedia.contract_address,
             "buy",
-            [milady.contract_address, *TOKEN, len(DATA), *DATA],
+            [tubbycats.contract_address, *TOKEN, len(DATA), *DATA],
         ),
         reverted_with="ERC20: transfer amount exceeds balance",
     )
@@ -118,9 +118,9 @@ async def test_negative_not_enough_balance_while_buying(send_dai_to_bob_and_char
 
 @pytest.mark.asyncio
 async def test_positive_buy(send_dai_to_bob_and_charlie):
-    artpedia, milady, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
 
-    response = await milady.ownerOf(TOKEN).invoke()
+    response = await tubbycats.ownerOf(TOKEN).invoke()
     assert response.result == (bob.contract_address,)
 
     response = await dai.balanceOf(bob.contract_address).invoke()
@@ -147,7 +147,7 @@ async def test_positive_buy(send_dai_to_bob_and_charlie):
         charlie,
         artpedia.contract_address,
         "buy",
-        [milady.contract_address, *TOKEN, len(DATA), *DATA],
+        [tubbycats.contract_address, *TOKEN, len(DATA), *DATA],
     )
 
     assert_event_emitted(
@@ -157,14 +157,14 @@ async def test_positive_buy(send_dai_to_bob_and_charlie):
         data=[
             charlie.contract_address,
             bob.contract_address,
-            milady.contract_address,
+            tubbycats.contract_address,
             *TOKEN,
             dai.contract_address,
             *AMOUNT,
         ],
     )
 
-    response = await milady.ownerOf(TOKEN).invoke()
+    response = await tubbycats.ownerOf(TOKEN).invoke()
     assert response.result == (charlie.contract_address,)
 
     response = await dai.balanceOf(bob.contract_address).invoke()

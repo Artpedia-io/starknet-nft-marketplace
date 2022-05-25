@@ -45,6 +45,8 @@ INITAL_SUPPLY = to_uint(20000)
 AMOUNT = to_uint(1000)
 AMOUNT2 = to_uint(10000)
 ZERO_AMOUNT = to_uint(0)
+PLATFORM_FEE = to_uint(2)
+DECIMALS = to_uint(100)
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -91,11 +93,11 @@ async def deployer():
     erc721_def = get_contract_def(
         "openzeppelin/token/erc721/ERC721_Mintable_Burnable.cairo"
     )
-    milady = await starknet.deploy(
+    tubbycats = await starknet.deploy(
         contract_def=erc721_def,
         constructor_calldata=[
-            str_to_felt("Milady Maker"),  # name
-            str_to_felt("MiladyMaker"),  # ticker
+            str_to_felt("tubbycats Maker"),  # name
+            str_to_felt("tubbycatsMaker"),  # ticker
             bob.contract_address,  # owner
         ],
     )
@@ -103,10 +105,15 @@ async def deployer():
     exchange_def = get_contract_def("exchange/Exchange.cairo")
     artpedia = await starknet.deploy(
         contract_def=exchange_def,
-        constructor_calldata=[alice.contract_address, dai.contract_address],
+        constructor_calldata=[
+            alice.contract_address,
+            dai.contract_address,
+            *PLATFORM_FEE,
+            *DECIMALS,
+        ],
     )
 
-    return [starknet.state, artpedia, milady, dai, ust, alice, bob, charlie], [
+    return [starknet.state, artpedia, tubbycats, dai, ust, alice, bob, charlie], [
         exchange_def,
         erc721_def,
         erc20_def,
@@ -116,7 +123,7 @@ async def deployer():
 
 @pytest.fixture
 def factory(deployer):
-    [starknet_state, artpedia, milady, dai, ust, alice, bob, charlie], [
+    [starknet_state, artpedia, tubbycats, dai, ust, alice, bob, charlie], [
         exchange_def,
         erc721_def,
         erc20_def,
@@ -128,51 +135,51 @@ def factory(deployer):
     bob = cached_contract(_state, account_def, bob)
     charlie = cached_contract(_state, account_def, charlie)
     artpedia = cached_contract(_state, exchange_def, artpedia)
-    milady = cached_contract(_state, erc721_def, milady)
+    tubbycats = cached_contract(_state, erc721_def, tubbycats)
     dai = cached_contract(_state, erc20_def, dai)
     ust = cached_contract(_state, erc20_def, ust)
-    return artpedia, milady, dai, ust, alice, bob, charlie
+    return artpedia, tubbycats, dai, ust, alice, bob, charlie
 
 
 @pytest.fixture
-async def milady_minted_to_bob(factory):
-    artpedia, milady, dai, ust, alice, bob, charlie = factory
+async def tubbycats_minted_to_bob(factory):
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = factory
     for token in TOKENS:
         await signer.send_transaction(
-            bob, milady.contract_address, "mint", [bob.contract_address, *token]
+            bob, tubbycats.contract_address, "mint", [bob.contract_address, *token]
         )
 
-    return artpedia, milady, dai, ust, alice, bob, charlie
+    return artpedia, tubbycats, dai, ust, alice, bob, charlie
 
 
 @pytest.fixture
-async def milady_0_is_listed_by_bob(factory):
-    artpedia, milady, dai, ust, alice, bob, charlie = factory
+async def tubbycats_0_is_listed_by_bob(factory):
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = factory
 
     for token in TOKENS:
         await signer.send_transaction(
-            bob, milady.contract_address, "mint", [bob.contract_address, *token]
+            bob, tubbycats.contract_address, "mint", [bob.contract_address, *token]
         )
 
     # bob delegate TOKEN to Artpedia Exchange
     await signer.send_transaction(
-        bob, milady.contract_address, "approve", [artpedia.contract_address, *TOKEN]
+        bob, tubbycats.contract_address, "approve", [artpedia.contract_address, *TOKEN]
     )
 
-    # list milady 0
+    # list tubbycats 0
     await signer.send_transaction(
         bob,
         artpedia.contract_address,
         "listing",
-        [milady.contract_address, *TOKEN, dai.contract_address, *AMOUNT],
+        [tubbycats.contract_address, *TOKEN, dai.contract_address, *AMOUNT],
     )
 
-    return artpedia, milady, dai, ust, alice, bob, charlie
+    return artpedia, tubbycats, dai, ust, alice, bob, charlie
 
 
 @pytest.fixture
-async def send_dai_to_bob_and_charlie(milady_0_is_listed_by_bob):
-    artpedia, milady, dai, ust, alice, bob, charlie = milady_0_is_listed_by_bob
+async def send_dai_to_bob_and_charlie(tubbycats_0_is_listed_by_bob):
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = tubbycats_0_is_listed_by_bob
 
     # send to bob
     await signer.send_transaction(
@@ -196,7 +203,7 @@ async def send_dai_to_bob_and_charlie(milady_0_is_listed_by_bob):
         ],
     )
 
-    return artpedia, milady, dai, ust, alice, bob, charlie
+    return artpedia, tubbycats, dai, ust, alice, bob, charlie
 
 
 # @pytest.fixture(autouse=True)
