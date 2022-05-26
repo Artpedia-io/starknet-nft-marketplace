@@ -96,8 +96,8 @@ async def deployer():
     tubbycats = await starknet.deploy(
         contract_def=erc721_def,
         constructor_calldata=[
-            str_to_felt("tubbycats Maker"),  # name
-            str_to_felt("tubbycatsMaker"),  # ticker
+            str_to_felt("0xratwell"),  # name
+            str_to_felt("tubbycats"),  # ticker
             bob.contract_address,  # owner
         ],
     )
@@ -108,6 +108,7 @@ async def deployer():
         constructor_calldata=[
             alice.contract_address,
             dai.contract_address,
+            alice.contract_address,
             *PLATFORM_FEE,
             *MULTIPLIER,
         ],
