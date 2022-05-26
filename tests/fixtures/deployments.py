@@ -45,8 +45,8 @@ INITAL_SUPPLY = to_uint(20000)
 AMOUNT = to_uint(1000)
 AMOUNT2 = to_uint(10000)
 ZERO_AMOUNT = to_uint(0)
-PLATFORM_FEE = to_uint(2)
-DECIMALS = to_uint(100)
+PLATFORM_FEE = to_uint(2000)
+MULTIPLIER = to_uint(1000)
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -109,7 +109,7 @@ async def deployer():
             alice.contract_address,
             dai.contract_address,
             *PLATFORM_FEE,
-            *DECIMALS,
+            *MULTIPLIER,
         ],
     )
 

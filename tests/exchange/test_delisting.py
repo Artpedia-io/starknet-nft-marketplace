@@ -56,9 +56,7 @@ async def test_positive_delist_item_by_owner(tubbycats_0_is_listed_by_bob):
         "delisting",
         [tubbycats.contract_address, *TOKEN],
     )
-    response = await artpedia.check_listed_items(
-        tubbycats.contract_address, TOKEN
-    ).invoke()
+    response = await artpedia.is_listed_item(tubbycats.contract_address, TOKEN).invoke()
     assert response.result.is_on_sale == 0
     assert response.result.payment_token == 0
     assert response.result.listing_price == ZERO_AMOUNT
@@ -96,9 +94,7 @@ async def test_positive_delist_item_by_operator(tubbycats_0_is_listed_by_bob):
         [tubbycats.contract_address, *TOKEN],
     )
 
-    response = await artpedia.check_listed_items(
-        tubbycats.contract_address, TOKEN
-    ).invoke()
+    response = await artpedia.is_listed_item(tubbycats.contract_address, TOKEN).invoke()
     assert response.result.is_on_sale == 0
     assert response.result.payment_token == 0
     assert response.result.listing_price == ZERO_AMOUNT

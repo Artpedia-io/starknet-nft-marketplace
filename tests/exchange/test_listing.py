@@ -51,9 +51,7 @@ ZERO_AMOUNT = to_uint(0)
 async def test_positive_listing_by_owner(tubbycats_minted_to_bob):
     artpedia, tubbycats, dai, ust, alice, bob, charlie = tubbycats_minted_to_bob
 
-    response = await artpedia.check_listed_items(
-        tubbycats.contract_address, TOKEN
-    ).invoke()
+    response = await artpedia.is_listed_item(tubbycats.contract_address, TOKEN).invoke()
     assert response.result.is_on_sale == 0
     assert response.result.payment_token == 0
     assert response.result.listing_price == ZERO_AMOUNT
@@ -89,9 +87,7 @@ async def test_positive_listing_by_owner(tubbycats_minted_to_bob):
         ],
     )
 
-    response = await artpedia.check_listed_items(
-        tubbycats.contract_address, TOKEN
-    ).invoke()
+    response = await artpedia.is_listed_item(tubbycats.contract_address, TOKEN).invoke()
     assert response.result.is_on_sale == 1
     assert response.result.payment_token == dai.contract_address
     assert response.result.listing_price == AMOUNT
@@ -101,9 +97,7 @@ async def test_positive_listing_by_owner(tubbycats_minted_to_bob):
 async def test_positive_listing_by_operator(tubbycats_minted_to_bob):
     artpedia, tubbycats, dai, ust, alice, bob, charlie = tubbycats_minted_to_bob
 
-    response = await artpedia.check_listed_items(
-        tubbycats.contract_address, TOKEN
-    ).invoke()
+    response = await artpedia.is_listed_item(tubbycats.contract_address, TOKEN).invoke()
     assert response.result.is_on_sale == 0
     assert response.result.payment_token == 0
     assert response.result.listing_price == ZERO_AMOUNT
@@ -150,9 +144,7 @@ async def test_positive_listing_by_operator(tubbycats_minted_to_bob):
         ],
     )
 
-    response = await artpedia.check_listed_items(
-        tubbycats.contract_address, TOKEN
-    ).invoke()
+    response = await artpedia.is_listed_item(tubbycats.contract_address, TOKEN).invoke()
     assert response.result.is_on_sale == 1
     assert response.result.payment_token == dai.contract_address
     assert response.result.listing_price == AMOUNT
@@ -162,9 +154,7 @@ async def test_positive_listing_by_operator(tubbycats_minted_to_bob):
 async def test_negative_listing_listed_item(tubbycats_0_is_listed_by_bob):
     artpedia, tubbycats, dai, ust, alice, bob, charlie = tubbycats_0_is_listed_by_bob
 
-    response = await artpedia.check_listed_items(
-        tubbycats.contract_address, TOKEN
-    ).invoke()
+    response = await artpedia.is_listed_item(tubbycats.contract_address, TOKEN).invoke()
     assert response.result.is_on_sale == 1
     assert response.result.payment_token == dai.contract_address
     assert response.result.listing_price == AMOUNT

@@ -64,7 +64,7 @@ async def test_remove_approved_tokens_by_admin(factory):
         data=[dai.contract_address, 0],
     )
 
-    response = await artpedia.check_approved_tokens_as_payment(
+    response = await artpedia.is_approved_token_as_payment(
         dai.contract_address
     ).invoke()
     assert response.result.is_approved == 0
@@ -87,7 +87,7 @@ async def test_positive_add_approval_to_new_erc20_token_by_admin(factory):
         data=[ust.contract_address, 1],
     )
 
-    response = await artpedia.check_approved_tokens_as_payment(
+    response = await artpedia.is_approved_token_as_payment(
         ust.contract_address
     ).invoke()
     assert response.result.is_approved == 1
