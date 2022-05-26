@@ -19,5 +19,8 @@ async def test_constructor(factory):
     assert response.result.platform_fee == to_uint(2000)
     assert response.result.multiplier == to_uint(1000)
 
+    response = await artpedia.get_treasury_address().invoke()
+    assert response.result.treasury_address == alice.contract_address
+
     admin_response = await artpedia.get_admin().invoke()
     assert admin_response.result.admin == alice.contract_address
