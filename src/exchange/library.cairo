@@ -265,9 +265,12 @@ namespace Exchange:
     end
 
     func send_erc20_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        sender : felt, recipient : felt, payment_token : felt, amount : felt
+        payment_token : felt, sender : felt, recipient : felt, amount : Uint256
     ):
+        alloc_locals
         let (treasury_address) = get_treasury_address()
+        local treasury_address = treasury_address
+
         let (treasury_allocation, seller_allocation) = get_token_allocation(amount)
 
         IERC20.transferFrom(
@@ -276,6 +279,7 @@ namespace Exchange:
             recipient=recipient,
             amount=seller_allocation,
         )
+        # let (treasury_address) = get_treasury_address()
         IERC20.transferFrom(
             contract_address=payment_token,
             sender=sender,
@@ -420,9 +424,7 @@ namespace Exchange:
         )
 
         # send ERC20 from buyer to seller
-        IERC20.transferFrom(
-            contract_address=payment_token, sender=buyer, recipient=seller, amount=item_price
-        )
+        send_erc20_token(payment_token, buyer, seller, item_price)
 
         # emit event
         OrdersMatched.emit(buyer, seller, nft_collection, token_id, payment_token, item_price)

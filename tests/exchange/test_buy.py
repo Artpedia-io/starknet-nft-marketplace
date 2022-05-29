@@ -46,6 +46,7 @@ INITAL_SUPPLY = to_uint(1000)
 AMOUNT = to_uint(1000)
 INITIAL_BALANCE = to_uint(10000)
 ZERO_AMOUNT = to_uint(0)
+ETH_TO_WEI = 1e18
 
 
 @pytest.mark.asyncio
@@ -117,11 +118,14 @@ async def test_negative_not_enough_balance_while_buying(send_dai_to_bob_and_char
 
 
 @pytest.mark.asyncio
-async def test_positive_buy(send_dai_to_bob_and_charlie):
+async def test_positive_buy_1000_wei(send_dai_to_bob_and_charlie):
     artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
 
     response = await tubbycats.ownerOf(TOKEN).invoke()
     assert response.result == (bob.contract_address,)
+
+    response = await dai.balanceOf(alice.contract_address).invoke()
+    assert response.result.balance == ZERO_AMOUNT
 
     response = await dai.balanceOf(bob.contract_address).invoke()
     assert response.result.balance == INITIAL_BALANCE
@@ -167,8 +171,11 @@ async def test_positive_buy(send_dai_to_bob_and_charlie):
     response = await tubbycats.ownerOf(TOKEN).invoke()
     assert response.result == (charlie.contract_address,)
 
-    response = await dai.balanceOf(bob.contract_address).invoke()
-    assert response.result.balance == to_uint(11000)
-
     response = await dai.balanceOf(charlie.contract_address).invoke()
     assert response.result.balance == to_uint(9000)
+
+    response = await dai.balanceOf(bob.contract_address).invoke()
+    assert response.result.balance == to_uint(10980)
+
+    response = await dai.balanceOf(alice.contract_address).invoke()
+    assert response.result.balance == to_uint(20)
