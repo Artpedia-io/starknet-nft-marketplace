@@ -185,20 +185,21 @@ async def test_negative_listing_without_approval(tubbycats_minted_to_bob):
     )
 
 
-# @pytest.mark.asyncio
-# async def test_negative_listing_zero_amount(tubbycats_minted_to_bob):
-#     artpedia, tubbycats, dai, ust, alice, bob, charlie = tubbycats_minted_to_bob
+@pytest.mark.asyncio
+async def test_negative_listing_zero_amount(tubbycats_minted_to_bob):
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = tubbycats_minted_to_bob
 
-#     # bob delegate TOKEN to Artpedia Exchange
-#     await signer.send_transaction(
-#         bob, tubbycats.contract_address, "approve", [artpedia.contract_address, *TOKEN]
-#     )
+    # bob delegate TOKEN to Artpedia Exchange
+    await signer.send_transaction(
+        bob, tubbycats.contract_address, "approve", [artpedia.contract_address, *TOKEN]
+    )
 
-#     await assert_revert(
-#         signer.send_transaction(
-#             bob,
-#             artpedia.contract_address,
-#             "listing",
-#             [tubbycats.contract_address, *TOKEN, dai.contract_address, *ZERO_AMOUNT]
-#         ), reverted_with="ArtpediaExchange: "
-#     )
+    await assert_revert(
+        signer.send_transaction(
+            bob,
+            artpedia.contract_address,
+            "listing",
+            [tubbycats.contract_address, *TOKEN, dai.contract_address, *ZERO_AMOUNT],
+        ),
+        reverted_with="ArtpediaExchange: amount must be more than zero",
+    )

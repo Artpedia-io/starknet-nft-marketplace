@@ -15,6 +15,7 @@ from starkware.cairo.common.uint256 import (
     uint256_unsigned_div_rem,
     uint256_mul,
     uint256_sub,
+    uint256_signed_lt,
 )
 
 from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
@@ -202,6 +203,20 @@ namespace Internal:
         end
         return ()
     end
+
+    func assert_uint256_not_zero{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        amount : Uint256
+    ):
+        # TODO: listing price assertion
+        let one = Uint256(1, 0)
+        # return 1 if amount (left) is lesser than one
+        let (is_zero) = uint256_signed_lt(amount, one)
+
+        with_attr error_message("ArtpediaExchange: amount must be more than zero"):
+            assert is_zero = 0
+        end
+        return ()
+    end
 end
 
 namespace Exchange:
@@ -261,12 +276,14 @@ namespace Exchange:
         let (divisor, _) = uint256_mul(Uint256(100, 0), _multiplier)
         let (treasury_allocation, _) = uint256_unsigned_div_rem(quotient, divisor)
         let seller_allocation = uint256_sub(amount, treasury_allocation)
+
         return (treasury_allocation, seller_allocation.res)
     end
 
     func send_erc20_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         payment_token : felt, sender : felt, recipient : felt, amount : Uint256
     ):
+        # TODO: prevent reentrant
         alloc_locals
         let (treasury_address) = get_treasury_address()
         local treasury_address = treasury_address
@@ -348,6 +365,8 @@ namespace Exchange:
             assert_not_zero(nft_collection)
         end
 
+        Internal.assert_uint256_not_zero(listing_price)
+
         # TODO: calculate token allocation
 
         # write to blockchain
@@ -414,6 +433,7 @@ namespace Exchange:
         # calculate_token_allocation(item_price)
 
         # send ERC721 from seller to buyer
+        # TODO: prevent reentrant
         IERC721.safeTransferFrom(
             contract_address=nft_collection,
             from_=seller,

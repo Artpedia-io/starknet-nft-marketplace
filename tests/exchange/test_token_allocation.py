@@ -52,6 +52,15 @@ ETH_TO_WEI = 1e18
 @pytest.mark.asyncio
 async def test_token_allocation_50_wei(factory):
     artpedia, tubbycats, dai, ust, alice, bob, charlie = factory
+    listing_price = to_uint(49)
+    response = await artpedia.get_token_allocation(listing_price).invoke()
+    assert response.result.platform_allocation == to_uint(0)
+    assert response.result.seller_allocation == to_uint(49)
+
+
+@pytest.mark.asyncio
+async def test_token_allocation_50_wei(factory):
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = factory
     listing_price = to_uint(50)
     response = await artpedia.get_token_allocation(listing_price).invoke()
     assert response.result.platform_allocation == to_uint(1)
