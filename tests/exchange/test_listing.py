@@ -46,6 +46,8 @@ AMOUNT = to_uint(1000)
 AMOUNT2 = to_uint(10000)
 ZERO_AMOUNT = to_uint(0)
 
+TOKENS_CHARLIE = [to_uint(0), to_uint(1)]
+
 
 @pytest.mark.asyncio
 async def test_positive_listing_by_owner(tubbycats_minted_to_bob):
@@ -145,6 +147,70 @@ async def test_positive_listing_by_operator(tubbycats_minted_to_bob):
     )
 
     response = await artpedia.is_listed_item(tubbycats.contract_address, TOKEN).invoke()
+    assert response.result.is_on_sale == 1
+    assert response.result.payment_token == dai.contract_address
+    assert response.result.listing_price == AMOUNT
+
+
+@pytest.mark.asyncio
+async def test_listing_by_charlie_after_bob_have_listed(tubbycats_minted_to_charlie):
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = tubbycats_minted_to_charlie
+
+    token_id = TOKENS_CHARLIE[0]
+    response = await artpedia.is_listed_item(
+        tubbycats.contract_address, token_id
+    ).invoke()
+
+    assert response.result.is_on_sale == 0
+    assert response.result.payment_token == 0
+    assert response.result.listing_price == ZERO_AMOUNT
+
+    for token in TOKENS_CHARLIE:
+        response = await tubbycats.ownerOf(token).invoke()
+        assert response.result == (charlie.contract_address,)
+
+    # charlie delegate TOKEN to Artpedia Exchange
+    await signer.send_transaction(
+        charlie,
+        tubbycats.contract_address,
+        "approve",
+        [artpedia.contract_address, *token_id],
+    )
+
+    # execute listing transaction
+    response = await signer.send_transaction(
+        charlie,
+        artpedia.contract_address,
+        "listing",
+        [tubbycats.contract_address, *token_id, dai.contract_address, *AMOUNT],
+    )
+
+    # check
+    assert_event_emitted(
+        response,
+        from_address=artpedia.contract_address,
+        name="Listing",
+        data=[
+            charlie.contract_address,
+            tubbycats.contract_address,
+            *token_id,
+            dai.contract_address,
+            *AMOUNT,
+        ],
+    )
+
+    response = await artpedia.is_listed_item(
+        tubbycats.contract_address, token_id
+    ).invoke()
+    assert response.result.is_on_sale == 1
+    assert response.result.payment_token == dai.contract_address
+    assert response.result.listing_price == AMOUNT
+
+    token_id = TOKEN
+    response = await artpedia.is_listed_item(
+        tubbycats.contract_address, token_id
+    ).invoke()
+
     assert response.result.is_on_sale == 1
     assert response.result.payment_token == dai.contract_address
     assert response.result.listing_price == AMOUNT

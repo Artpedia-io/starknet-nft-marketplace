@@ -21,11 +21,15 @@ signer = Signer(123456789987654321)
 
 NONEXISTENT_TOKEN = to_uint(999)
 # random token IDs
-TOKENS = [to_uint(5042), to_uint(793)]
+TOKENS_BOB = [to_uint(5042), to_uint(793)]
 # test token
-TOKEN = TOKENS[0]
+TOKEN = TOKENS_BOB[0]
 # test token 1
-TOKEN1 = TOKENS[1]
+TOKEN1 = TOKENS_BOB[1]
+
+TOKENS_CHARLIE = [to_uint(0), to_uint(1)]
+
+
 # random user address
 RECIPIENT = 555
 # random data (mimicking bytes in Solidity)
@@ -54,6 +58,7 @@ async def deployer():
     starknet = await Starknet.empty()
 
     account_def = get_contract_def("openzeppelin/account/Account.cairo")
+
     alice = await starknet.deploy(
         contract_def=account_def, constructor_calldata=[signer.public_key]
     )
@@ -93,6 +98,7 @@ async def deployer():
     erc721_def = get_contract_def(
         "openzeppelin/token/erc721/ERC721_Mintable_Burnable.cairo"
     )
+
     tubbycats = await starknet.deploy(
         contract_def=erc721_def,
         constructor_calldata=[
@@ -145,7 +151,7 @@ def factory(deployer):
 @pytest.fixture
 async def tubbycats_minted_to_bob(factory):
     artpedia, tubbycats, dai, ust, alice, bob, charlie = factory
-    for token in TOKENS:
+    for token in TOKENS_BOB:
         await signer.send_transaction(
             bob, tubbycats.contract_address, "mint", [bob.contract_address, *token]
         )
@@ -157,7 +163,7 @@ async def tubbycats_minted_to_bob(factory):
 async def tubbycats_0_is_listed_by_bob(factory):
     artpedia, tubbycats, dai, ust, alice, bob, charlie = factory
 
-    for token in TOKENS:
+    for token in TOKENS_BOB:
         await signer.send_transaction(
             bob, tubbycats.contract_address, "mint", [bob.contract_address, *token]
         )
@@ -174,6 +180,20 @@ async def tubbycats_0_is_listed_by_bob(factory):
         "listing",
         [tubbycats.contract_address, *TOKEN, dai.contract_address, *AMOUNT],
     )
+
+    return artpedia, tubbycats, dai, ust, alice, bob, charlie
+
+
+@pytest.fixture
+async def tubbycats_minted_to_charlie(tubbycats_0_is_listed_by_bob):
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = tubbycats_0_is_listed_by_bob
+    for token in TOKENS_CHARLIE:
+        await signer.send_transaction(
+            bob,
+            tubbycats.contract_address,
+            "mint",
+            [charlie.contract_address, *token],
+        )
 
     return artpedia, tubbycats, dai, ust, alice, bob, charlie
 
