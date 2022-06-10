@@ -33,6 +33,17 @@ func Listing(
 end
 
 @event
+func Bidding(
+    sender : felt,
+    nft_collection : felt,
+    token_id : Uint256,
+    payment_token : felt,
+    bidding_price : Uint256,
+    expire_time : felt,
+):
+end
+
+@event
 func ApproveTokenAsPayment(token : felt, is_approved : felt):
 end
 
@@ -451,30 +462,30 @@ namespace Exchange:
         return ()
     end
 
-    # func bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    #     nft_collection : felt,
-    #     token_id : felt,
-    #     payment_token : felt,
-    #     price_bid : felt,
-    #     expire_time : felt,
-    # ):
-    #     # bid must be greater than 0
+    func bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        nft_collection : felt, token_id : Uint256, payment_token : felt, price_bid : Uint256
+    ):
+        let (bidder) = get_caller_address()
+        # bid must be greater than 0
+        Internal.assert_uint256_not_zero(price_bid)
 
-    # # buyer must have enough token
+        # buyer must have enough token
 
-    # # buyer must have enough allowance
+        # buyer must have enough allowance
 
-    # # exchange must be approved for ERC20 transfer
+        # exchange must be approved for ERC20 transfer
 
-    # # exchange must be approved for ERC721 transfer
+        # exchange must be approved for ERC721 transfer
 
-    # # buyer must not be ERC721 owner
+        # buyer must not be ERC721 owner
 
-    # # write to blockchain
+        # write to blockchain
 
-    # # emit events
-    #     return ()
-    # end
+        # emit events
+        let (bidder) = get_caller_address()
+        Bidding.emit(bidder, nft_collection, token_id, payment_token, price_bid, 0)
+        return ()
+    end
 
     # func accept_bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     #     nft_collection : felt,

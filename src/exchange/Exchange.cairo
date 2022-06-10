@@ -117,6 +117,14 @@ func buy{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
 end
 
 @external
+func bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    nft_collection : felt, token_id : Uint256, payment_token : felt, price_bid : Uint256
+):
+    Exchange.bid(nft_collection, token_id, payment_token, price_bid)
+    return ()
+end
+
+@external
 func set_treasury_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     treasury_address : felt
 ):
