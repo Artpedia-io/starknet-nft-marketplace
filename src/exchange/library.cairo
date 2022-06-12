@@ -152,15 +152,17 @@ namespace Internal:
     func assert_owner_have_enough_erc20_token{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(erc20_token : felt, item_price : Uint256):
+        alloc_locals
         # buyer must have enough token
         let (caller) = get_caller_address()
         let (balance) = IERC20.balanceOf(contract_address=erc20_token, account=caller)
 
         # erc20 balance (rhs) must be more than the item price
-        # let (is_enough_erc20_token) = uint256_le(item_price, balance)
-        # with_attr error_message("ArtpediaExchange: buyer does not have enough ERC-20 Tokens"):
-        #     assert is_enough_erc20_token = 1
-        # end
+        local syscall_ptr : felt* = syscall_ptr
+        let (is_enough_erc20_token) = uint256_le(item_price, balance)
+        with_attr error_message("ArtpediaExchange: buyer does not have enough ERC-20 Tokens"):
+            assert is_enough_erc20_token = 1
+        end
         return ()
     end
 
@@ -471,11 +473,13 @@ namespace Exchange:
     func bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         nft_collection : felt, token_id : Uint256, payment_token : felt, price_bid : Uint256
     ):
+        alloc_locals
         let (bidder) = get_caller_address()
         # bid must be greater than 0
         Internal.assert_uint256_not_zero(price_bid)
 
         # buyer must have enough token
+        Internal.assert_owner_have_enough_erc20_token(payment_token, price_bid)
 
         # buyer must have enough allowance
 
