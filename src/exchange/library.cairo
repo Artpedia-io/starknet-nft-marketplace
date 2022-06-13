@@ -458,12 +458,15 @@ namespace Exchange:
         Internal.assert_caller_not_owner(nft_collection, token_id)
 
         # buyer must have enough erc20 token
+        # currently handled by ERC20 interface
         # assert_owner_have_enough_erc20_token(payment_token, item_price)
 
         # exchange must have enough allowance for ERC20 transfer
+        # currently handled by ERC20 interface
         # assert_exchange_have_enough_erc20_allowance(payment_token, item_price)
 
         # exchange must be approved for ERC721 transfer
+        # currently handled by ERC721 interface
         # assert_exchange_approved_for_erc721(nft_collection, token_id)
 
         # send ERC721 from seller to buyer
