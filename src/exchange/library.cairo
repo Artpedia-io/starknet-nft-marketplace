@@ -486,9 +486,8 @@ namespace Exchange:
         # buyer must have enough ERC20 allowance
         Internal.assert_exchange_have_enough_erc20_allowance(payment_token, price_bid)
 
-        # exchange must be approved for ERC721 transfer
-
         # buyer must not be ERC721 owner
+        Internal.assert_caller_not_owner(nft_collection, token_id)
 
         # write to blockchain
 
