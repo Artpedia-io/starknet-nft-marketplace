@@ -104,6 +104,60 @@ async def test_positive_maxbid_listed_item(send_dai_to_bob_and_charlie):
 
 
 @pytest.mark.asyncio
+async def test_positive_maxbid_unlisted_item(send_dai_to_bob_and_charlie):
+    """
+    5042 is listed by bob
+    793 is minted to bob
+    0 is minted to charlie
+    1 is minted to charlie
+    """
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
+
+    AMOUNT = to_uint(10000)
+
+    token_id = TOKENS_BOB[1]
+
+    await signer.send_transaction(
+        charlie, dai.contract_address, "approve", [artpedia.contract_address, *AMOUNT]
+    )
+
+    response = await signer.send_transaction(
+        charlie,
+        artpedia.contract_address,
+        "bid",
+        [
+            tubbycats.contract_address,
+            *token_id,
+            dai.contract_address,
+            *AMOUNT,
+            QUARTER_HOUR,
+        ],
+    )
+
+    assert_event_emitted(
+        response,
+        from_address=artpedia.contract_address,
+        name="Bidding",
+        data=[
+            charlie.contract_address,
+            tubbycats.contract_address,
+            *token_id,
+            dai.contract_address,
+            *AMOUNT,
+            900,
+        ],
+    )
+
+    response = await artpedia.get_bade_item(
+        tubbycats.contract_address, token_id, charlie.contract_address
+    ).invoke()
+
+    assert response.result.payment_token == dai.contract_address
+    assert response.result.price_bid == AMOUNT
+    assert response.result.expire_time == 900
+
+
+@pytest.mark.asyncio
 async def test_negative_bid_with_zero_price(send_dai_to_bob_and_charlie):
     """
     5042 is listed by bob
