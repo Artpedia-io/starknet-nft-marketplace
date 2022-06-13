@@ -57,8 +57,13 @@ async def test_positive_maxbid_listed_item(send_dai_to_bob_and_charlie):
     artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
 
     AMOUNT = to_uint(10000)
+
+    await signer.send_transaction(
+        charlie, dai.contract_address, "approve", [artpedia.contract_address, *AMOUNT]
+    )
+
     response = await signer.send_transaction(
-        bob,
+        charlie,
         artpedia.contract_address,
         "bid",
         [tubbycats.contract_address, *TOKENS_BOB[0], dai.contract_address, *AMOUNT],
@@ -69,7 +74,7 @@ async def test_positive_maxbid_listed_item(send_dai_to_bob_and_charlie):
         from_address=artpedia.contract_address,
         name="Bidding",
         data=[
-            bob.contract_address,
+            charlie.contract_address,
             tubbycats.contract_address,
             *TOKENS_BOB[0],
             dai.contract_address,
@@ -91,7 +96,7 @@ async def test_negative_bid_zero_price(send_dai_to_bob_and_charlie):
 
     await assert_revert(
         signer.send_transaction(
-            bob,
+            charlie,
             artpedia.contract_address,
             "bid",
             [
@@ -107,7 +112,7 @@ async def test_negative_bid_zero_price(send_dai_to_bob_and_charlie):
 
 @pytest.mark.asyncio
 async def test_negative_owner_have_insufficient_erc20_token(
-    tubbycats_minted_to_charlie,
+    send_dai_to_bob_and_charlie,
 ):
     """
     5042 is listed by bob
@@ -115,13 +120,13 @@ async def test_negative_owner_have_insufficient_erc20_token(
     0 is minted to charlie
     1 is minted to charlie
     """
-    artpedia, tubbycats, dai, ust, alice, bob, charlie = tubbycats_minted_to_charlie
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
 
     AMOUNT = to_uint(10001)
 
     await assert_revert(
         signer.send_transaction(
-            bob,
+            charlie,
             artpedia.contract_address,
             "bid",
             [
@@ -132,4 +137,34 @@ async def test_negative_owner_have_insufficient_erc20_token(
             ],
         ),
         reverted_with="ArtpediaExchange: buyer does not have enough ERC-20 Tokens",
+    )
+
+
+@pytest.mark.asyncio
+async def test_negative_owner_have_insufficient_erc20_allowance(
+    send_dai_to_bob_and_charlie,
+):
+    """
+    5042 is listed by bob
+    793 is minted to bob
+    0 is minted to charlie
+    1 is minted to charlie
+    """
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
+
+    AMOUNT = to_uint(10000)
+
+    await assert_revert(
+        signer.send_transaction(
+            charlie,
+            artpedia.contract_address,
+            "bid",
+            [
+                tubbycats.contract_address,
+                *TOKENS_BOB[0],
+                dai.contract_address,
+                *AMOUNT,
+            ],
+        ),
+        reverted_with="ArtpediaExchange: insufficient allowance",
     )
