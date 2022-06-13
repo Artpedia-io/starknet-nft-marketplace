@@ -58,6 +58,8 @@ async def test_positive_maxbid_listed_item(send_dai_to_bob_and_charlie):
 
     AMOUNT = to_uint(10000)
 
+    token_id = TOKENS_BOB[0]
+
     await signer.send_transaction(
         charlie, dai.contract_address, "approve", [artpedia.contract_address, *AMOUNT]
     )
@@ -66,7 +68,7 @@ async def test_positive_maxbid_listed_item(send_dai_to_bob_and_charlie):
         charlie,
         artpedia.contract_address,
         "bid",
-        [tubbycats.contract_address, *TOKENS_BOB[0], dai.contract_address, *AMOUNT],
+        [tubbycats.contract_address, *token_id, dai.contract_address, *AMOUNT],
     )
 
     assert_event_emitted(
@@ -76,12 +78,20 @@ async def test_positive_maxbid_listed_item(send_dai_to_bob_and_charlie):
         data=[
             charlie.contract_address,
             tubbycats.contract_address,
-            *TOKENS_BOB[0],
+            *token_id,
             dai.contract_address,
             *AMOUNT,
             0,
         ],
     )
+
+    response = await artpedia.get_bade_item(
+        tubbycats.contract_address, token_id, charlie.contract_address
+    ).invoke()
+
+    assert response.result.payment_token == dai.contract_address
+    assert response.result.price_bid == AMOUNT
+    assert response.result.expire_time == 0
 
 
 @pytest.mark.asyncio

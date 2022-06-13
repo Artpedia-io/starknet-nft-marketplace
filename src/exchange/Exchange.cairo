@@ -140,3 +140,11 @@ func get_treasury_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     let (treasury_address) = Exchange.get_treasury_address()
     return (treasury_address)
 end
+
+@view
+func get_bade_item{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    nft_collection : felt, token_id : Uint256, bidder : felt
+) -> (payment_token : felt, price_bid : Uint256, expire_time : felt):
+    let (bid_info) = Exchange.get_bade_item(nft_collection, token_id, bidder)
+    return (bid_info.payment_token, bid_info.price_bid, bid_info.expire_time)
+end

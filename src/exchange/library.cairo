@@ -80,15 +80,21 @@ struct PricingInformation:
     member listing_price : Uint256
 end
 
-struct BiddingInformation:
-    member nft_collection : felt
-    member token_id : felt
-    member bidder : felt
+struct BidInfo:
+    member payment_token : felt
+    member price_bid : Uint256
+    member expire_time : felt
 end
 
 @storage_var
 func listing_information(nft_collection : felt, token_id : Uint256) -> (
     pricing_information : PricingInformation
+):
+end
+
+@storage_var
+func bid_information(nft_collection : felt, token_id : Uint256, bidder : felt) -> (
+    bid_information : BidInfo
 ):
 end
 
@@ -477,6 +483,8 @@ namespace Exchange:
     ):
         alloc_locals
         let (bidder) = get_caller_address()
+
+        let expire_time = 0
         # bid must be greater than 0
         Internal.assert_uint256_not_zero(price_bid)
 
@@ -490,11 +498,21 @@ namespace Exchange:
         Internal.assert_caller_not_owner(nft_collection, token_id)
 
         # write to blockchain
+        bid_information.write(
+            nft_collection, token_id, bidder, BidInfo(payment_token, price_bid, expire_time)
+        )
 
         # emit events
         let (bidder) = get_caller_address()
-        Bidding.emit(bidder, nft_collection, token_id, payment_token, price_bid, 0)
+        Bidding.emit(bidder, nft_collection, token_id, payment_token, price_bid, expire_time)
         return ()
+    end
+
+    func get_bade_item{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        nft_collection : felt, price_bid : Uint256, bidder : felt
+    ) -> (bid_info : BidInfo):
+        let (bid_info) = bid_information.read(nft_collection, price_bid, bidder)
+        return (bid_info)
     end
 
     # func accept_bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
