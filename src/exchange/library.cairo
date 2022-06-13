@@ -528,10 +528,21 @@ namespace Exchange:
     end
 
     func get_bade_item{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        nft_collection : felt, price_bid : Uint256, bidder : felt
+        nft_collection : felt, token_id : Uint256, bidder : felt
     ) -> (bid_info : BidInfo):
-        let (bid_info) = bid_information.read(nft_collection, price_bid, bidder)
+        let (bid_info) = bid_information.read(nft_collection, token_id, bidder)
         return (bid_info)
+    end
+
+    func cancel_bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        nft_collection : felt, price_bid : Uint256
+    ):
+        # caller must be owner or operator(s)
+        # bid must exist
+        # write to db
+        # emit event
+
+        return ()
     end
 
     # func accept_bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
