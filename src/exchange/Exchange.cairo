@@ -118,9 +118,13 @@ end
 
 @external
 func bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    nft_collection : felt, token_id : Uint256, payment_token : felt, price_bid : Uint256
+    nft_collection : felt,
+    token_id : Uint256,
+    payment_token : felt,
+    price_bid : Uint256,
+    expire_time : felt,
 ):
-    Exchange.bid(nft_collection, token_id, payment_token, price_bid)
+    Exchange.bid(nft_collection, token_id, payment_token, price_bid, expire_time)
     return ()
 end
 

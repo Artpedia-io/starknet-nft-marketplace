@@ -45,6 +45,9 @@ ZERO_AMOUNT = to_uint(0)
 TOKENS_BOB = [to_uint(5042), to_uint(793)]
 TOKENS_CHARLIE = [to_uint(0), to_uint(1)]
 
+SECONDS_IN_DAY = 86400
+QUARTER_HOUR = int(SECONDS_IN_DAY / 24 / 4)
+
 
 @pytest.mark.asyncio
 async def test_positive_maxbid_listed_item(send_dai_to_bob_and_charlie):
@@ -68,7 +71,13 @@ async def test_positive_maxbid_listed_item(send_dai_to_bob_and_charlie):
         charlie,
         artpedia.contract_address,
         "bid",
-        [tubbycats.contract_address, *token_id, dai.contract_address, *AMOUNT],
+        [
+            tubbycats.contract_address,
+            *token_id,
+            dai.contract_address,
+            *AMOUNT,
+            QUARTER_HOUR,
+        ],
     )
 
     assert_event_emitted(
@@ -81,7 +90,7 @@ async def test_positive_maxbid_listed_item(send_dai_to_bob_and_charlie):
             *token_id,
             dai.contract_address,
             *AMOUNT,
-            0,
+            900,
         ],
     )
 
@@ -91,7 +100,7 @@ async def test_positive_maxbid_listed_item(send_dai_to_bob_and_charlie):
 
     assert response.result.payment_token == dai.contract_address
     assert response.result.price_bid == AMOUNT
-    assert response.result.expire_time == 0
+    assert response.result.expire_time == 900
 
 
 @pytest.mark.asyncio
@@ -114,6 +123,7 @@ async def test_negative_bid_with_zero_price(send_dai_to_bob_and_charlie):
                 *TOKENS_BOB[0],
                 dai.contract_address,
                 *ZERO_AMOUNT,
+                QUARTER_HOUR,
             ],
         ),
         reverted_with="ArtpediaExchange: amount must be more than zero",
@@ -144,6 +154,7 @@ async def test_negative_bidder_have_insufficient_erc20_token(
                 *TOKENS_BOB[0],
                 dai.contract_address,
                 *AMOUNT,
+                QUARTER_HOUR,
             ],
         ),
         reverted_with="ArtpediaExchange: buyer does not have enough ERC-20 Tokens",
@@ -174,6 +185,7 @@ async def test_negative_bidder_have_insufficient_erc20_allowance(
                 *TOKENS_BOB[0],
                 dai.contract_address,
                 *AMOUNT,
+                QUARTER_HOUR,
             ],
         ),
         reverted_with="ArtpediaExchange: insufficient allowance",
@@ -208,6 +220,7 @@ async def test_negative_assert_bidder_is_not_owner(
                 *TOKENS_BOB[0],
                 dai.contract_address,
                 *AMOUNT,
+                QUARTER_HOUR,
             ],
         ),
         reverted_with="ArtpediaExchange: caller is ERC-721 owner",

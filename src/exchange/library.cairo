@@ -244,6 +244,18 @@ namespace Internal:
         end
         return ()
     end
+
+    func assert_bid_not_expired{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        expire_time : felt
+    ):
+        let (block_timestamp) = get_block_timestamp()
+        let is_not_expired = uint256_signed_lt(block_timestamp, expire_time)
+
+        with_attr error_message("ArtpediaExchange: bid has expired"):
+            assert is_not_expired = 1
+        end
+        return ()
+    end
 end
 
 namespace Exchange:
@@ -479,12 +491,19 @@ namespace Exchange:
     end
 
     func bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        nft_collection : felt, token_id : Uint256, payment_token : felt, price_bid : Uint256
+        nft_collection : felt,
+        token_id : Uint256,
+        payment_token : felt,
+        price_bid : Uint256,
+        expire_time : felt,
     ):
         alloc_locals
+
+        let (block_timestamp) = get_block_timestamp()
+        let bid_expiry = block_timestamp + expire_time
+
         let (bidder) = get_caller_address()
 
-        let expire_time = 0
         # bid must be greater than 0
         Internal.assert_uint256_not_zero(price_bid)
 
@@ -499,12 +518,12 @@ namespace Exchange:
 
         # write to blockchain
         bid_information.write(
-            nft_collection, token_id, bidder, BidInfo(payment_token, price_bid, expire_time)
+            nft_collection, token_id, bidder, BidInfo(payment_token, price_bid, bid_expiry)
         )
 
         # emit events
         let (bidder) = get_caller_address()
-        Bidding.emit(bidder, nft_collection, token_id, payment_token, price_bid, expire_time)
+        Bidding.emit(bidder, nft_collection, token_id, payment_token, price_bid, bid_expiry)
         return ()
     end
 
