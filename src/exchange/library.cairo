@@ -335,7 +335,7 @@ namespace Exchange:
             recipient=recipient,
             amount=seller_allocation,
         )
-        # let (treasury_address) = get_treasury_address()
+
         IERC20.transferFrom(
             contract_address=payment_token,
             sender=sender,
@@ -406,8 +406,6 @@ namespace Exchange:
 
         Internal.assert_uint256_not_zero(listing_price)
 
-        # TODO: calculate token allocation
-
         # write to blockchain
         let pricing_information = PricingInformation(
             is_on_sale=1, payment_token=payment_token, listing_price=listing_price
@@ -452,24 +450,21 @@ namespace Exchange:
         let item_price = pricing_information.listing_price
         let payment_token = pricing_information.payment_token
 
-        # # item must be listed
+        # item must be listed
         Internal.assert_listed_item(nft_collection, token_id)
 
-        # # buyer must not be ERC721 owner
+        # buyer must not be ERC721 owner
         local pedersen_ptr : HashBuiltin* = pedersen_ptr
         Internal.assert_caller_not_owner(nft_collection, token_id)
 
-        # # buyer must have enough erc20 token
+        # buyer must have enough erc20 token
         # assert_owner_have_enough_erc20_token(payment_token, item_price)
 
-        # # exchange must have enough allowance for ERC20 transfer
+        # exchange must have enough allowance for ERC20 transfer
         # assert_exchange_have_enough_erc20_allowance(payment_token, item_price)
 
-        # # exchange must be approved for ERC721 transfer
+        # exchange must be approved for ERC721 transfer
         # assert_exchange_approved_for_erc721(nft_collection, token_id)
-
-        # TODO: calculate token allocation
-        # calculate_token_allocation(item_price)
 
         # send ERC721 from seller to buyer
         # TODO: prevent reentrant
@@ -487,6 +482,10 @@ namespace Exchange:
 
         # emit event
         OrdersMatched.emit(buyer, seller, nft_collection, token_id, payment_token, item_price)
+
+        # delist item
+        delisting(nft_collection, token_id)
+
         return ()
     end
 

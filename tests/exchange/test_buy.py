@@ -168,6 +168,20 @@ async def test_positive_buy_1000_wei(send_dai_to_bob_and_charlie):
         ],
     )
 
+    # TODO: test delisting event
+    # assert_event_emitted(
+    #     response_buy,
+    #     from_address=artpedia.contract_address,
+    #     name="Listing",
+    #     data=[
+    #         charlie.contract_address,
+    #         tubbycats.contract_address,
+    #         *TOKEN,
+    #         dai.contract_address,
+    #         *AMOUNT,
+    #     ],
+    # )
+
     response = await tubbycats.ownerOf(TOKEN).invoke()
     assert response.result == (charlie.contract_address,)
 
@@ -179,3 +193,8 @@ async def test_positive_buy_1000_wei(send_dai_to_bob_and_charlie):
 
     response = await dai.balanceOf(alice.contract_address).invoke()
     assert response.result.balance == to_uint(20)
+
+    response = await artpedia.is_listed_item(tubbycats.contract_address, TOKEN).invoke()
+    assert response.result.is_on_sale == 0
+    assert response.result.payment_token == 0
+    assert response.result.listing_price == ZERO_AMOUNT
