@@ -2,7 +2,13 @@
 
 %lang starknet
 
-from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
+from starkware.starknet.common.syscalls import (
+    get_caller_address,
+    get_contract_address,
+    get_block_number,
+    get_block_timestamp,
+)
+
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
 from starkware.cairo.common.math import assert_not_zero, assert_lt, assert_not_equal
 from starkware.cairo.common.bool import TRUE, FALSE
@@ -29,6 +35,17 @@ func Listing(
     token_id : Uint256,
     payment_token : felt,
     listing_price : Uint256,
+):
+end
+
+@event
+func Bidding(
+    sender : felt,
+    nft_collection : felt,
+    token_id : Uint256,
+    payment_token : felt,
+    bidding_price : Uint256,
+    expire_time : felt,
 ):
 end
 
@@ -63,15 +80,21 @@ struct PricingInformation:
     member listing_price : Uint256
 end
 
-struct BiddingInformation:
-    member nft_collection : felt
-    member token_id : felt
-    member bidder : felt
+struct BidInfo:
+    member payment_token : felt
+    member price_bid : Uint256
+    member expire_time : felt
 end
 
 @storage_var
 func listing_information(nft_collection : felt, token_id : Uint256) -> (
     pricing_information : PricingInformation
+):
+end
+
+@storage_var
+func bid_information(nft_collection : felt, token_id : Uint256, bidder : felt) -> (
+    bid_information : BidInfo
 ):
 end
 
@@ -135,30 +158,34 @@ namespace Internal:
     func assert_owner_have_enough_erc20_token{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(erc20_token : felt, item_price : Uint256):
+        alloc_locals
         # buyer must have enough token
         let (caller) = get_caller_address()
         let (balance) = IERC20.balanceOf(contract_address=erc20_token, account=caller)
 
         # erc20 balance (rhs) must be more than the item price
-        # let (is_enough_erc20_token) = uint256_le(item_price, balance)
-        # with_attr error_message("ArtpediaExchange: buyer does not have enough ERC-20 Tokens"):
-        #     assert is_enough_erc20_token = 1
-        # end
+        local syscall_ptr : felt* = syscall_ptr
+        let (is_enough_erc20_token) = uint256_le(item_price, balance)
+        with_attr error_message("ArtpediaExchange: buyer does not have enough ERC-20 Tokens"):
+            assert is_enough_erc20_token = 1
+        end
         return ()
     end
 
     func assert_exchange_have_enough_erc20_allowance{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(erc20_token : felt, item_price : Uint256):
+        alloc_locals
         let (caller) = get_caller_address()
         let (exchange) = get_contract_address()
         let (allowance) = IERC20.allowance(
             contract_address=erc20_token, owner=caller, spender=exchange
         )
-        # let (is_enough_allowance) = uint256_le(item_price, allowance)
-        # with_attr error_message("ArtpediaExchange: insufficient allowance"):
-        #     assert is_enough_allowance = 1
-        # end
+        local syscall_ptr : felt* = syscall_ptr
+        let (is_enough_allowance) = uint256_le(item_price, allowance)
+        with_attr error_message("ArtpediaExchange: insufficient allowance"):
+            assert is_enough_allowance = 1
+        end
         return ()
     end
     func assert_listed_item{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -214,6 +241,18 @@ namespace Internal:
 
         with_attr error_message("ArtpediaExchange: amount must be more than zero"):
             assert is_zero = 0
+        end
+        return ()
+    end
+
+    func assert_bid_not_expired{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        expire_time : felt
+    ):
+        let (block_timestamp) = get_block_timestamp()
+        let is_not_expired = uint256_signed_lt(block_timestamp, expire_time)
+
+        with_attr error_message("ArtpediaExchange: bid has expired"):
+            assert is_not_expired = 1
         end
         return ()
     end
@@ -451,30 +490,49 @@ namespace Exchange:
         return ()
     end
 
-    # func bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    #     nft_collection : felt,
-    #     token_id : felt,
-    #     payment_token : felt,
-    #     price_bid : felt,
-    #     expire_time : felt,
-    # ):
-    #     # bid must be greater than 0
+    func bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        nft_collection : felt,
+        token_id : Uint256,
+        payment_token : felt,
+        price_bid : Uint256,
+        expire_time : felt,
+    ):
+        alloc_locals
 
-    # # buyer must have enough token
+        let (block_timestamp) = get_block_timestamp()
+        let bid_expiry = block_timestamp + expire_time
 
-    # # buyer must have enough allowance
+        let (bidder) = get_caller_address()
 
-    # # exchange must be approved for ERC20 transfer
+        # bid must be greater than 0
+        Internal.assert_uint256_not_zero(price_bid)
 
-    # # exchange must be approved for ERC721 transfer
+        # buyer must have enough token
+        Internal.assert_owner_have_enough_erc20_token(payment_token, price_bid)
 
-    # # buyer must not be ERC721 owner
+        # buyer must have enough ERC20 allowance
+        Internal.assert_exchange_have_enough_erc20_allowance(payment_token, price_bid)
 
-    # # write to blockchain
+        # buyer must not be ERC721 owner
+        Internal.assert_caller_not_owner(nft_collection, token_id)
 
-    # # emit events
-    #     return ()
-    # end
+        # write to blockchain
+        bid_information.write(
+            nft_collection, token_id, bidder, BidInfo(payment_token, price_bid, bid_expiry)
+        )
+
+        # emit events
+        let (bidder) = get_caller_address()
+        Bidding.emit(bidder, nft_collection, token_id, payment_token, price_bid, bid_expiry)
+        return ()
+    end
+
+    func get_bade_item{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        nft_collection : felt, price_bid : Uint256, bidder : felt
+    ) -> (bid_info : BidInfo):
+        let (bid_info) = bid_information.read(nft_collection, price_bid, bidder)
+        return (bid_info)
+    end
 
     # func accept_bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     #     nft_collection : felt,
