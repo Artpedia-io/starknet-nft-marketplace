@@ -557,6 +557,7 @@ namespace Exchange:
         let price_bid = Uint256(0, 0)
         let bid_expiry = 0
         # write to db
+        let (bidder) = get_caller_address()
         bid_information.write(
             nft_collection, token_id, bidder, BidInfo(payment_token, price_bid, bid_expiry)
         )
