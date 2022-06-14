@@ -537,12 +537,33 @@ namespace Exchange:
     end
 
     func cancel_bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        nft_collection : felt, price_bid : Uint256
+        nft_collection : felt, token_id : Uint256
     ):
-        # caller must be owner or operator(s)
+        let (bidder) = get_caller_address()
+        let (bid_info) = get_bade_item(nft_collection, token_id, bidder)
+
         # bid must exist
+        with_attr error_message("ArtpediaExchange: no bid for this token_id"):
+            assert_not_zero(bid_info.payment_token)
+        end
+
+        with_attr error_message("ArtpediaExchange: no bid for this token_id"):
+            Internal.assert_uint256_not_zero(bid_info.price_bid)
+        end
+
+        # caller must be owner or operator(s)
+
+        let payment_token = 0
+        let price_bid = Uint256(0, 0)
+        let bid_expiry = 0
         # write to db
+        bid_information.write(
+            nft_collection, token_id, bidder, BidInfo(payment_token, price_bid, bid_expiry)
+        )
+
         # emit event
+        let (bidder) = get_caller_address()
+        Bidding.emit(bidder, nft_collection, token_id, payment_token, price_bid, bid_expiry)
 
         return ()
     end
@@ -556,21 +577,21 @@ namespace Exchange:
     # ):
     #     # caller must be owner or operator(s)
 
-    # # bid must exist
+    # bid must exist
 
-    # # bidding price must be at least the same as minimum_price
+    # bidding price must be at least the same as minimum_price
 
-    # # exchange must be approved for ERC20 transfer
+    # exchange must be approved for ERC20 transfer
 
-    # # exchange must be approved for ERC721 transfer
+    # exchange must be approved for ERC721 transfer
 
-    # # calculate token allocation
+    # calculate token allocation
 
-    # # send ERC20 from buyer(bidder) to seller (ERC721 owner)
+    # send ERC20 from buyer(bidder) to seller (ERC721 owner)
 
-    # # send ERC721 from seller(ERC721 owner) to buyer(bidder)
+    # send ERC721 from seller(ERC721 owner) to buyer(bidder)
 
-    # # emit events
+    # emit events
 
     # return ()
     # end
