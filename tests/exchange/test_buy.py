@@ -99,6 +99,17 @@ async def test_negative_insufficient_allowance_while_buying(
 async def test_negative_not_enough_balance_while_buying(send_dai_to_bob_and_charlie):
     artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
 
+    amount = to_uint(10000)
+    await signer.send_transaction(
+        alice,
+        dai.contract_address,
+        "transfer",
+        [
+            bob.contract_address,
+            *amount,
+        ],
+    )
+
     await signer.send_transaction(
         alice,
         dai.contract_address,
@@ -125,7 +136,7 @@ async def test_positive_buy_1000_wei(send_dai_to_bob_and_charlie):
     assert response.result == (bob.contract_address,)
 
     response = await dai.balanceOf(alice.contract_address).invoke()
-    assert response.result.balance == ZERO_AMOUNT
+    assert response.result.balance == INITIAL_BALANCE
 
     response = await dai.balanceOf(bob.contract_address).invoke()
     assert response.result.balance == INITIAL_BALANCE
@@ -192,7 +203,7 @@ async def test_positive_buy_1000_wei(send_dai_to_bob_and_charlie):
     assert response.result.balance == to_uint(10980)
 
     response = await dai.balanceOf(alice.contract_address).invoke()
-    assert response.result.balance == to_uint(20)
+    assert response.result.balance == to_uint(10020)
 
     response = await artpedia.is_listed_item(tubbycats.contract_address, TOKEN).invoke()
     assert response.result.is_on_sale == 0
