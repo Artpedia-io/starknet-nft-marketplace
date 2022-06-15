@@ -599,6 +599,8 @@ namespace Exchange:
         payment_token : felt,
         minimum_price : Uint256,
         bidder : felt,
+        data_len : felt,
+        data : felt*,
     ):
         alloc_locals
         let (seller) = get_caller_address()
@@ -616,13 +618,18 @@ namespace Exchange:
             assert is_mev_detected = 1
         end
 
-        # exchange must be approved for ERC20 transfer
-
+        # TODO: currently handled by ERC721 transferFrom
         # exchange must be approved for ERC721 transfer
 
-        # calculate token allocation
-
         # send ERC20 from buyer(bidder) to seller (ERC721 owner)
+        IERC721.safeTransferFrom(
+            contract_address=nft_collection,
+            from_=seller,
+            to=bidder,
+            tokenId=token_id,
+            data_len=data_len,
+            data=data,
+        )
 
         # send ERC721 from seller(ERC721 owner) to buyer(bidder)
 

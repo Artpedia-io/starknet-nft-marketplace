@@ -112,6 +112,8 @@ async def test_negative_accept_maxbid_by_bidder(send_dai_to_bob_and_charlie):
                 dai.contract_address,
                 *BID_ALICE,
                 alice.contract_address,
+                len(DATA),
+                *DATA,
             ],
         ),
         reverted_with="ArtpediaExchange: caller is not owner nor operators",
@@ -128,6 +130,8 @@ async def test_negative_accept_maxbid_by_bidder(send_dai_to_bob_and_charlie):
                 dai.contract_address,
                 *BID_ALICE,
                 alice.contract_address,
+                len(DATA),
+                *DATA,
             ],
         ),
         reverted_with="ArtpediaExchange: caller is not owner nor operators",
@@ -167,6 +171,8 @@ async def test_negative_assert_bid_exists(send_dai_to_bob_and_charlie):
                 dai.contract_address,
                 *BID_ALICE,
                 alice.contract_address,
+                len(DATA),
+                *DATA,
             ],
         ),
         reverted_with="ArtpediaExchange: no bid for this token_id",
@@ -183,6 +189,8 @@ async def test_negative_assert_bid_exists(send_dai_to_bob_and_charlie):
                 dai.contract_address,
                 *BID_CHARLIE,
                 charlie.contract_address,
+                len(DATA),
+                *DATA,
             ],
         ),
         reverted_with="ArtpediaExchange: no bid for this token_id",
@@ -259,6 +267,8 @@ async def test_negative_bid_frontrunning_detected(send_dai_to_bob_and_charlie):
                 dai.contract_address,
                 *BID_ALICE,
                 alice.contract_address,
+                len(DATA),
+                *DATA,
             ],
         ),
         reverted_with="ArtpediaExchange: bid frontrunning detected",
@@ -327,6 +337,8 @@ async def test_positive_accept_maxbid_listed_item_by_owner(send_dai_to_bob_and_c
             dai.contract_address,
             *BID_ALICE,
             alice.contract_address,
+            len(DATA),
+            *DATA,
         ],
     )
 
@@ -409,6 +421,13 @@ async def test_positive_maxbid_unlisted_item_by_owner(send_dai_to_bob_and_charli
         ],
     )
 
+    await signer.send_transaction(
+        bob,
+        tubbycats.contract_address,
+        "approve",
+        [artpedia.contract_address, *token_id],
+    )
+
     response = await signer.send_transaction(
         bob,
         artpedia.contract_address,
@@ -419,6 +438,8 @@ async def test_positive_maxbid_unlisted_item_by_owner(send_dai_to_bob_and_charli
             dai.contract_address,
             *BID_CHARLIE,
             charlie.contract_address,
+            len(DATA),
+            *DATA,
         ],
     )
 
