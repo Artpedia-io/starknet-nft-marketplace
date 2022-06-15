@@ -621,7 +621,8 @@ namespace Exchange:
         # TODO: currently handled by ERC721 transferFrom
         # exchange must be approved for ERC721 transfer
 
-        # send ERC20 from buyer(bidder) to seller (ERC721 owner)
+        # send ERC721 from seller(ERC721 owner) to buyer(bidder)
+        # TODO: prevent reentrant
         IERC721.safeTransferFrom(
             contract_address=nft_collection,
             from_=seller,
@@ -631,7 +632,8 @@ namespace Exchange:
             data=data,
         )
 
-        # send ERC721 from seller(ERC721 owner) to buyer(bidder)
+        # send ERC20 from bidder to seller (ERC721 owner)
+        # TODO: prevent reentrant
 
         # emit events
         local syscall_ptr : felt* = syscall_ptr
