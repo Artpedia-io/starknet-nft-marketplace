@@ -594,31 +594,31 @@ namespace Exchange:
         return ()
     end
 
-    # func accept_bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    #     nft_collection : felt,
-    #     token_id : felt,
-    #     payment_token : felt,
-    #     minimum_price : felt,
-    #     taker : felt,
-    # ):
-    #     # caller must be owner or operator(s)
+    func accept_bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        nft_collection : felt,
+        token_id : felt,
+        payment_token : felt,
+        minimum_price : felt,
+        bidder : felt,
+    ):
+        # caller must be owner or operator(s)
 
-    # bid must exist
+        # bid must exist
 
-    # bidding price must be at least the same as minimum_price
+        # bidding price must be at least the same as minimum_price
 
-    # exchange must be approved for ERC20 transfer
+        # exchange must be approved for ERC20 transfer
 
-    # exchange must be approved for ERC721 transfer
+        # exchange must be approved for ERC721 transfer
 
-    # calculate token allocation
+        # calculate token allocation
 
-    # send ERC20 from buyer(bidder) to seller (ERC721 owner)
+        # send ERC20 from buyer(bidder) to seller (ERC721 owner)
 
-    # send ERC721 from seller(ERC721 owner) to buyer(bidder)
+        # send ERC721 from seller(ERC721 owner) to buyer(bidder)
 
-    # emit events
+        # emit events
 
-    # return ()
-    # end
+        return ()
+    end
 end
