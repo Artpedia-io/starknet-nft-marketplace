@@ -596,12 +596,15 @@ namespace Exchange:
 
     func accept_bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         nft_collection : felt,
-        token_id : felt,
+        token_id : Uint256,
         payment_token : felt,
-        minimum_price : felt,
+        minimum_price : Uint256,
         bidder : felt,
     ):
+        let (seller) = get_caller_address()
+
         # caller must be owner or operator(s)
+        Internal.assert_token_owner_or_operator(nft_collection, token_id)
 
         # bid must exist
 
@@ -618,6 +621,7 @@ namespace Exchange:
         # send ERC721 from seller(ERC721 owner) to buyer(bidder)
 
         # emit events
+        OrdersMatched.emit(bidder, seller, nft_collection, token_id, payment_token, minimum_price)
 
         return ()
     end
