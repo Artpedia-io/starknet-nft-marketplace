@@ -256,12 +256,30 @@ namespace Internal:
         return ()
     end
 
-    func assert_bid_exist{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        nft_collection : felt, token_id : Uint256
-    ):
-        let (bidder) = get_caller_address()
-
+    func get_bade_item{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        nft_collection : felt, token_id : Uint256, bidder : felt
+    ) -> (bid_info : BidInfo):
         let (bid_info) = bid_information.read(nft_collection, token_id, bidder)
+        return (bid_info)
+    end
+
+    func assert_bid_exists{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        nft_collection : felt, token_id : Uint256, bidder : felt
+    ):
+        let (bid_info) = get_bade_item(nft_collection, token_id, bidder)
+
+        # bid must exist
+        with_attr error_message("ArtpediaExchange: no bid for this token_id"):
+            assert_not_zero(bid_info.payment_token)
+        end
+
+        with_attr error_message("ArtpediaExchange: no bid for this token_id"):
+            Internal.assert_uint256_not_zero(bid_info.price_bid)
+        end
+
+        with_attr error_message("ArtpediaExchange: no bid for this token_id"):
+            assert_not_zero(bidder)
+        end
 
         return ()
     end
@@ -541,7 +559,7 @@ namespace Exchange:
     func get_bade_item{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         nft_collection : felt, token_id : Uint256, bidder : felt
     ) -> (bid_info : BidInfo):
-        let (bid_info) = bid_information.read(nft_collection, token_id, bidder)
+        let (bid_info) = Internal.get_bade_item(nft_collection, token_id, bidder)
         return (bid_info)
     end
 
@@ -549,24 +567,15 @@ namespace Exchange:
         nft_collection : felt, token_id : Uint256, bidder : felt
     ):
         let (caller) = get_caller_address()
-        let (bid_info) = get_bade_item(nft_collection, token_id, bidder)
 
         # bid must exist
-        with_attr error_message("ArtpediaExchange: no bid for this token_id"):
-            assert_not_zero(bid_info.payment_token)
-        end
-
-        with_attr error_message("ArtpediaExchange: no bid for this token_id"):
-            Internal.assert_uint256_not_zero(bid_info.price_bid)
-        end
+        Internal.assert_bid_exists(nft_collection, token_id, bidder)
 
         # caller must be bidder
         let (caller) = get_caller_address()
         with_attr error_message("ArtpediaExchange: caller must be bidder"):
             assert caller = bidder
         end
-
-        # Internal.assert_token_owner_or_operator(nft_collection, token_id)
 
         let payment_token = 0
         let price_bid = Uint256(0, 0)
