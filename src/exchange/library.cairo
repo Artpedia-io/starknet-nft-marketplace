@@ -601,6 +601,7 @@ namespace Exchange:
         minimum_price : Uint256,
         bidder : felt,
     ):
+        alloc_locals
         let (seller) = get_caller_address()
 
         # caller must be owner or operator(s)
@@ -610,6 +611,11 @@ namespace Exchange:
         Internal.assert_bid_exists(nft_collection, token_id, bidder)
 
         # bidding price must be at least the same as minimum_price
+        let (bid_info) = Internal.get_bade_item(nft_collection, token_id, bidder)
+        let (is_mev_detected) = uint256_le(minimum_price, bid_info.price_bid)
+        with_attr error_message("ArtpediaExchange: bid frontrunning detected"):
+            assert is_mev_detected = 1
+        end
 
         # exchange must be approved for ERC20 transfer
 
@@ -622,6 +628,7 @@ namespace Exchange:
         # send ERC721 from seller(ERC721 owner) to buyer(bidder)
 
         # emit events
+        local syscall_ptr : felt* = syscall_ptr
         let (seller) = get_caller_address()
         OrdersMatched.emit(bidder, seller, nft_collection, token_id, payment_token, minimum_price)
 
