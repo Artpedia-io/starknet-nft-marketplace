@@ -607,6 +607,7 @@ namespace Exchange:
         Internal.assert_token_owner_or_operator(nft_collection, token_id)
 
         # bid must exist
+        Internal.assert_bid_exists(nft_collection, token_id, bidder)
 
         # bidding price must be at least the same as minimum_price
 
@@ -621,6 +622,7 @@ namespace Exchange:
         # send ERC721 from seller(ERC721 owner) to buyer(bidder)
 
         # emit events
+        let (seller) = get_caller_address()
         OrdersMatched.emit(bidder, seller, nft_collection, token_id, payment_token, minimum_price)
 
         return ()

@@ -135,6 +135,61 @@ async def test_negative_accept_maxbid_by_bidder(send_dai_to_bob_and_charlie):
 
 
 @pytest.mark.asyncio
+async def test_negative_assert_bid_exists(send_dai_to_bob_and_charlie):
+    """
+    5042 is listed by bob
+    793 is minted to bob
+    0 is minted to charlie
+    1 is minted to charlie
+    """
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
+
+    BID_CHARLIE = to_uint(5000)
+    BID_ALICE = to_uint(10000)
+
+    token_id = TOKENS_BOB[0]
+
+    await signer.send_transaction(
+        charlie,
+        dai.contract_address,
+        "approve",
+        [artpedia.contract_address, *BID_CHARLIE],
+    )
+
+    await assert_revert(
+        signer.send_transaction(
+            bob,
+            artpedia.contract_address,
+            "accept_bid",
+            [
+                tubbycats.contract_address,
+                *token_id,
+                dai.contract_address,
+                *BID_ALICE,
+                alice.contract_address,
+            ],
+        ),
+        reverted_with="ArtpediaExchange: no bid for this token_id",
+    )
+
+    await assert_revert(
+        signer.send_transaction(
+            bob,
+            artpedia.contract_address,
+            "accept_bid",
+            [
+                tubbycats.contract_address,
+                *token_id,
+                dai.contract_address,
+                *BID_CHARLIE,
+                charlie.contract_address,
+            ],
+        ),
+        reverted_with="ArtpediaExchange: no bid for this token_id",
+    )
+
+
+@pytest.mark.asyncio
 async def test_positive_accept_maxbid_listed_item_by_owner(send_dai_to_bob_and_charlie):
     """
     5042 is listed by bob
