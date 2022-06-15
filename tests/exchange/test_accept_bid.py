@@ -50,7 +50,7 @@ QUARTER_HOUR = int(SECONDS_IN_DAY / 24 / 4)
 
 
 @pytest.mark.asyncio
-async def test_positive_accept_maxbid_listed_item(send_dai_to_bob_and_charlie):
+async def test_positive_accept_maxbid_listed_item_by_owner(send_dai_to_bob_and_charlie):
     """
     5042 is listed by bob
     793 is minted to bob
@@ -127,6 +127,19 @@ async def test_positive_accept_maxbid_listed_item(send_dai_to_bob_and_charlie):
             *BID_ALICE,
         ],
     )
+
+
+@pytest.mark.asyncio
+async def test_positive_accept_maxbid_listed_item_by_operator(
+    send_dai_to_bob_and_charlie,
+):
+    """
+    5042 is listed by bob
+    793 is minted to bob
+    0 is minted to charlie
+    1 is minted to charlie
+    """
+    # TODO
 
 
 @pytest.mark.asyncio
