@@ -154,13 +154,13 @@ namespace Internal:
         return ()
     end
 
-    func assert_owner_have_enough_erc20_token{
+    func assert_bidder_have_enough_erc20_token{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(erc20_token : felt, item_price : Uint256):
+    }(erc20_token : felt, item_price : Uint256, bidder : felt):
         alloc_locals
         # buyer must have enough token
-        let (caller) = get_caller_address()
-        let (balance) = IERC20.balanceOf(contract_address=erc20_token, account=caller)
+
+        let (balance) = IERC20.balanceOf(contract_address=erc20_token, account=bidder)
 
         # erc20 balance (rhs) must be more than the item price
         local syscall_ptr : felt* = syscall_ptr
@@ -171,14 +171,13 @@ namespace Internal:
         return ()
     end
 
-    func assert_exchange_have_enough_erc20_allowance{
+    func assert_bidder_delegate_enough_erc20_to_exchange{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(erc20_token : felt, item_price : Uint256):
+    }(erc20_token : felt, item_price : Uint256, bidder):
         alloc_locals
-        let (caller) = get_caller_address()
         let (exchange) = get_contract_address()
         let (allowance) = IERC20.allowance(
-            contract_address=erc20_token, owner=caller, spender=exchange
+            contract_address=erc20_token, owner=bidder, spender=exchange
         )
         local syscall_ptr : felt* = syscall_ptr
         let (is_enough_allowance) = uint256_le(item_price, allowance)
@@ -486,11 +485,11 @@ namespace Exchange:
 
         # buyer must have enough erc20 token
         # currently handled by ERC20 interface
-        # assert_owner_have_enough_erc20_token(payment_token, item_price)
+        # assert_bidder_have_enough_erc20_token(payment_token, item_price)
 
         # exchange must have enough allowance for ERC20 transfer
         # currently handled by ERC20 interface
-        # assert_exchange_have_enough_erc20_allowance(payment_token, item_price)
+        # assert_bidder_delegate_enough_erc20_to_exchange(payment_token, item_price)
 
         # exchange must be approved for ERC721 transfer
         # currently handled by ERC721 interface
@@ -536,13 +535,13 @@ namespace Exchange:
         # bid must be greater than 0
         Internal.assert_uint256_not_zero(price_bid)
 
-        # buyer must have enough token
-        Internal.assert_owner_have_enough_erc20_token(payment_token, price_bid)
+        # bidder must have enough token
+        Internal.assert_bidder_have_enough_erc20_token(payment_token, price_bid, bidder)
 
-        # buyer must have enough ERC20 allowance
-        Internal.assert_exchange_have_enough_erc20_allowance(payment_token, price_bid)
+        # bidder must have enough ERC20 allowance
+        Internal.assert_bidder_delegate_enough_erc20_to_exchange(payment_token, price_bid, bidder)
 
-        # buyer must not be ERC721 owner
+        # bidder must not be ERC721 owner
         Internal.assert_caller_not_owner(nft_collection, token_id)
 
         # write to blockchain
