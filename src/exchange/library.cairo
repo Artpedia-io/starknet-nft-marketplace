@@ -148,8 +148,7 @@ namespace Internal:
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(nft_collection : felt, token_id : Uint256):
         let (owner_or_operator) = is_owner_or_operator(nft_collection, token_id)
-        with_attr error_message(
-                "ArtpediaExchange: caller is not owner nor approved(including operators)"):
+        with_attr error_message("ArtpediaExchange: caller is not owner nor operators"):
             assert owner_or_operator = 1
         end
         return ()
@@ -254,6 +253,16 @@ namespace Internal:
         with_attr error_message("ArtpediaExchange: bid has expired"):
             assert is_not_expired = 1
         end
+        return ()
+    end
+
+    func assert_bid_exist{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        nft_collection : felt, token_id : Uint256
+    ):
+        let (bidder) = get_caller_address()
+
+        let (bid_info) = bid_information.read(nft_collection, token_id, bidder)
+
         return ()
     end
 end
@@ -537,9 +546,9 @@ namespace Exchange:
     end
 
     func cancel_bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        nft_collection : felt, token_id : Uint256
+        nft_collection : felt, token_id : Uint256, bidder : felt
     ):
-        let (bidder) = get_caller_address()
+        let (caller) = get_caller_address()
         let (bid_info) = get_bade_item(nft_collection, token_id, bidder)
 
         # bid must exist
@@ -551,11 +560,18 @@ namespace Exchange:
             Internal.assert_uint256_not_zero(bid_info.price_bid)
         end
 
-        # caller must be owner or operator(s)
+        # caller must be bidder
+        let (caller) = get_caller_address()
+        with_attr error_message("ArtpediaExchange: caller must be bidder"):
+            assert caller = bidder
+        end
+
+        # Internal.assert_token_owner_or_operator(nft_collection, token_id)
 
         let payment_token = 0
         let price_bid = Uint256(0, 0)
         let bid_expiry = 0
+
         # write to db
         let (bidder) = get_caller_address()
         bid_information.write(

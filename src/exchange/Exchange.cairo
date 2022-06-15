@@ -155,8 +155,8 @@ end
 
 @external
 func cancel_bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    nft_collection : felt, token_id : Uint256
+    nft_collection : felt, token_id : Uint256, bidder : felt
 ):
-    Exchange.cancel_bid(nft_collection, token_id)
+    Exchange.cancel_bid(nft_collection, token_id, bidder)
     return ()
 end
