@@ -611,6 +611,8 @@ namespace Exchange:
         # bid must exist
         Internal.assert_bid_exists(nft_collection, token_id, bidder)
 
+        # bid must not expired
+
         # bidding price must be at least the same as minimum_price
         let (bid_info) = Internal.get_bade_item(nft_collection, token_id, bidder)
         let (is_mev_detected) = uint256_le(minimum_price, bid_info.price_bid)
@@ -634,6 +636,7 @@ namespace Exchange:
 
         # send ERC20 from bidder to seller (ERC721 owner)
         # TODO: prevent reentrant
+        send_erc20_token(payment_token, bidder, seller, minimum_price)
 
         # emit events
         local syscall_ptr : felt* = syscall_ptr
