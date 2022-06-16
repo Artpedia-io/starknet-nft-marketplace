@@ -154,13 +154,13 @@ namespace Internal:
         return ()
     end
 
-    func assert_owner_have_enough_erc20_token{
+    func assert_bidder_have_enough_erc20_token{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(erc20_token : felt, item_price : Uint256):
+    }(erc20_token : felt, item_price : Uint256, bidder : felt):
         alloc_locals
         # buyer must have enough token
-        let (caller) = get_caller_address()
-        let (balance) = IERC20.balanceOf(contract_address=erc20_token, account=caller)
+
+        let (balance) = IERC20.balanceOf(contract_address=erc20_token, account=bidder)
 
         # erc20 balance (rhs) must be more than the item price
         local syscall_ptr : felt* = syscall_ptr
@@ -171,14 +171,13 @@ namespace Internal:
         return ()
     end
 
-    func assert_exchange_have_enough_erc20_allowance{
+    func assert_bidder_delegate_enough_erc20_to_exchange{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(erc20_token : felt, item_price : Uint256):
+    }(erc20_token : felt, item_price : Uint256, bidder):
         alloc_locals
-        let (caller) = get_caller_address()
         let (exchange) = get_contract_address()
         let (allowance) = IERC20.allowance(
-            contract_address=erc20_token, owner=caller, spender=exchange
+            contract_address=erc20_token, owner=bidder, spender=exchange
         )
         local syscall_ptr : felt* = syscall_ptr
         let (is_enough_allowance) = uint256_le(item_price, allowance)
@@ -486,11 +485,11 @@ namespace Exchange:
 
         # buyer must have enough erc20 token
         # currently handled by ERC20 interface
-        # assert_owner_have_enough_erc20_token(payment_token, item_price)
+        # assert_bidder_have_enough_erc20_token(payment_token, item_price)
 
         # exchange must have enough allowance for ERC20 transfer
         # currently handled by ERC20 interface
-        # assert_exchange_have_enough_erc20_allowance(payment_token, item_price)
+        # assert_bidder_delegate_enough_erc20_to_exchange(payment_token, item_price)
 
         # exchange must be approved for ERC721 transfer
         # currently handled by ERC721 interface
@@ -536,13 +535,13 @@ namespace Exchange:
         # bid must be greater than 0
         Internal.assert_uint256_not_zero(price_bid)
 
-        # buyer must have enough token
-        Internal.assert_owner_have_enough_erc20_token(payment_token, price_bid)
+        # bidder must have enough token
+        Internal.assert_bidder_have_enough_erc20_token(payment_token, price_bid, bidder)
 
-        # buyer must have enough ERC20 allowance
-        Internal.assert_exchange_have_enough_erc20_allowance(payment_token, price_bid)
+        # bidder must have enough ERC20 allowance
+        Internal.assert_bidder_delegate_enough_erc20_to_exchange(payment_token, price_bid, bidder)
 
-        # buyer must not be ERC721 owner
+        # bidder must not be ERC721 owner
         Internal.assert_caller_not_owner(nft_collection, token_id)
 
         # write to blockchain
@@ -596,28 +595,53 @@ namespace Exchange:
 
     func accept_bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         nft_collection : felt,
-        token_id : felt,
+        token_id : Uint256,
         payment_token : felt,
-        minimum_price : felt,
+        minimum_price : Uint256,
         bidder : felt,
+        data_len : felt,
+        data : felt*,
     ):
+        alloc_locals
+        let (seller) = get_caller_address()
+
         # caller must be owner or operator(s)
+        Internal.assert_token_owner_or_operator(nft_collection, token_id)
 
         # bid must exist
+        Internal.assert_bid_exists(nft_collection, token_id, bidder)
+
+        # bid must not expired
 
         # bidding price must be at least the same as minimum_price
+        let (bid_info) = Internal.get_bade_item(nft_collection, token_id, bidder)
+        let (is_mev_detected) = uint256_le(minimum_price, bid_info.price_bid)
+        with_attr error_message("ArtpediaExchange: bid frontrunning detected"):
+            assert is_mev_detected = 1
+        end
 
-        # exchange must be approved for ERC20 transfer
-
+        # TODO: currently handled by ERC721 transferFrom
         # exchange must be approved for ERC721 transfer
 
-        # calculate token allocation
-
-        # send ERC20 from buyer(bidder) to seller (ERC721 owner)
-
         # send ERC721 from seller(ERC721 owner) to buyer(bidder)
+        # TODO: prevent reentrant
+        IERC721.safeTransferFrom(
+            contract_address=nft_collection,
+            from_=seller,
+            to=bidder,
+            tokenId=token_id,
+            data_len=data_len,
+            data=data,
+        )
+
+        # send ERC20 from bidder to seller (ERC721 owner)
+        # TODO: prevent reentrant
+        send_erc20_token(payment_token, bidder, seller, minimum_price)
 
         # emit events
+        local syscall_ptr : felt* = syscall_ptr
+        let (seller) = get_caller_address()
+        OrdersMatched.emit(bidder, seller, nft_collection, token_id, payment_token, minimum_price)
 
         return ()
     end

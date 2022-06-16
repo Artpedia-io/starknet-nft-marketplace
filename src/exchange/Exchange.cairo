@@ -160,3 +160,19 @@ func cancel_bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     Exchange.cancel_bid(nft_collection, token_id, bidder)
     return ()
 end
+
+@external
+func accept_bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    nft_collection : felt,
+    token_id : Uint256,
+    payment_token : felt,
+    minimum_price : Uint256,
+    bidder : felt,
+    data_len : felt,
+    data : felt*,
+):
+    Exchange.accept_bid(
+        nft_collection, token_id, payment_token, minimum_price, bidder, data_len, data
+    )
+    return ()
+end

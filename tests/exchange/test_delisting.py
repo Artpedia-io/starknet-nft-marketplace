@@ -124,7 +124,7 @@ async def test_delist_by_non_operator(tubbycats_0_is_listed_by_bob):
             "delisting",
             [tubbycats.contract_address, *TOKEN],
         ),
-        reverted_with="ArtpediaExchange: caller is not owner nor approved(including operators)",
+        reverted_with="ArtpediaExchange: caller is not owner nor operators",
     )
 
     await assert_revert(
@@ -134,7 +134,7 @@ async def test_delist_by_non_operator(tubbycats_0_is_listed_by_bob):
             "delisting",
             [tubbycats.contract_address, *TOKEN],
         ),
-        reverted_with="ArtpediaExchange: caller is not owner nor approved(including operators)",
+        reverted_with="ArtpediaExchange: caller is not owner nor operators",
     )
 
 
