@@ -563,18 +563,12 @@ namespace Exchange:
     end
 
     func cancel_bid{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        nft_collection : felt, token_id : Uint256, bidder : felt
+        nft_collection : felt, token_id : Uint256
     ):
-        let (caller) = get_caller_address()
+        let (bidder) = get_caller_address()
 
         # bid must exist
         Internal.assert_bid_exists(nft_collection, token_id, bidder)
-
-        # caller must be bidder
-        let (caller) = get_caller_address()
-        with_attr error_message("ArtpediaExchange: caller must be bidder"):
-            assert caller = bidder
-        end
 
         let payment_token = 0
         let price_bid = Uint256(0, 0)

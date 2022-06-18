@@ -84,7 +84,7 @@ async def test_positive_cancel_by_bidder(send_dai_to_bob_and_charlie):
         charlie,
         artpedia.contract_address,
         "cancel_bid",
-        [tubbycats.contract_address, *token_id, charlie.contract_address],
+        [tubbycats.contract_address, *token_id],
     )
 
     assert_event_emitted(
@@ -133,14 +133,14 @@ async def test_negative_no_bid_for_this_item(send_dai_to_bob_and_charlie):
             charlie,
             artpedia.contract_address,
             "cancel_bid",
-            [tubbycats.contract_address, *token_id, charlie.contract_address],
+            [tubbycats.contract_address, *token_id],
         ),
         reverted_with="ArtpediaExchange: no bid for this token_id",
     )
 
 
 @pytest.mark.asyncio
-async def test_negative_caller_is_not_owner_or_operator(send_dai_to_bob_and_charlie):
+async def test_negative_caller_is_not_bidder(send_dai_to_bob_and_charlie):
     """
     5042 is listed by bob
     793 is minted to bob
@@ -175,7 +175,7 @@ async def test_negative_caller_is_not_owner_or_operator(send_dai_to_bob_and_char
             alice,
             artpedia.contract_address,
             "cancel_bid",
-            [tubbycats.contract_address, *token_id, charlie.contract_address],
+            [tubbycats.contract_address, *token_id],
         ),
-        reverted_with="ArtpediaExchange: caller must be bidder",
+        reverted_with="ArtpediaExchange: no bid for this token_id",
     )
