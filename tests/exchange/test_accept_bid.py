@@ -49,397 +49,397 @@ SECONDS_IN_DAY = 86400
 QUARTER_HOUR = int(SECONDS_IN_DAY / 24 / 4)
 
 
-# @pytest.mark.asyncio
-# async def test_negative_accept_maxbid_by_bidder(send_dai_to_bob_and_charlie):
-#     """
-#     5042 is listed by bob
-#     793 is minted to bob
-#     0 is minted to charlie
-#     1 is minted to charlie
-#     """
-#     artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
+@pytest.mark.asyncio
+async def test_negative_accept_maxbid_by_bidder(send_dai_to_bob_and_charlie):
+    """
+    5042 is listed by bob
+    793 is minted to bob
+    0 is minted to charlie
+    1 is minted to charlie
+    """
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
 
-#     BID_CHARLIE = to_uint(5000)
-#     BID_ALICE = to_uint(10000)
+    BID_CHARLIE = to_uint(5000)
+    BID_ALICE = to_uint(10000)
 
-#     token_id = TOKENS_BOB[0]
+    token_id = TOKENS_BOB[0]
 
-#     await signer.send_transaction(
-#         charlie,
-#         dai.contract_address,
-#         "approve",
-#         [artpedia.contract_address, *BID_CHARLIE],
-#     )
+    await signer.send_transaction(
+        charlie,
+        dai.contract_address,
+        "approve",
+        [artpedia.contract_address, *BID_CHARLIE],
+    )
 
-#     await signer.send_transaction(
-#         charlie,
-#         artpedia.contract_address,
-#         "bid",
-#         [
-#             tubbycats.contract_address,
-#             *token_id,
-#             dai.contract_address,
-#             *BID_CHARLIE,
-#             QUARTER_HOUR,
-#         ],
-#     )
+    await signer.send_transaction(
+        charlie,
+        artpedia.contract_address,
+        "bid",
+        [
+            tubbycats.contract_address,
+            *token_id,
+            dai.contract_address,
+            *BID_CHARLIE,
+            QUARTER_HOUR,
+        ],
+    )
 
-#     await signer.send_transaction(
-#         alice, dai.contract_address, "approve", [artpedia.contract_address, *BID_ALICE]
-#     )
+    await signer.send_transaction(
+        alice, dai.contract_address, "approve", [artpedia.contract_address, *BID_ALICE]
+    )
 
-#     await signer.send_transaction(
-#         alice,
-#         artpedia.contract_address,
-#         "bid",
-#         [
-#             tubbycats.contract_address,
-#             *token_id,
-#             dai.contract_address,
-#             *BID_ALICE,
-#             QUARTER_HOUR,
-#         ],
-#     )
+    await signer.send_transaction(
+        alice,
+        artpedia.contract_address,
+        "bid",
+        [
+            tubbycats.contract_address,
+            *token_id,
+            dai.contract_address,
+            *BID_ALICE,
+            QUARTER_HOUR,
+        ],
+    )
 
-#     await assert_revert(
-#         signer.send_transaction(
-#             alice,
-#             artpedia.contract_address,
-#             "accept_bid",
-#             [
-#                 tubbycats.contract_address,
-#                 *token_id,
-#                 dai.contract_address,
-#                 *BID_ALICE,
-#                 alice.contract_address,
-#                 len(DATA),
-#                 *DATA,
-#             ],
-#         ),
-#         reverted_with="ArtpediaExchange: caller is not owner nor operators",
-#     )
+    await assert_revert(
+        signer.send_transaction(
+            alice,
+            artpedia.contract_address,
+            "accept_bid",
+            [
+                tubbycats.contract_address,
+                *token_id,
+                dai.contract_address,
+                *BID_ALICE,
+                alice.contract_address,
+                len(DATA),
+                *DATA,
+            ],
+        ),
+        reverted_with="ArtpediaExchange: caller is not owner nor operators",
+    )
 
-#     await assert_revert(
-#         signer.send_transaction(
-#             charlie,
-#             artpedia.contract_address,
-#             "accept_bid",
-#             [
-#                 tubbycats.contract_address,
-#                 *token_id,
-#                 dai.contract_address,
-#                 *BID_ALICE,
-#                 alice.contract_address,
-#                 len(DATA),
-#                 *DATA,
-#             ],
-#         ),
-#         reverted_with="ArtpediaExchange: caller is not owner nor operators",
-#     )
-
-
-# @pytest.mark.asyncio
-# async def test_negative_assert_bid_exists(send_dai_to_bob_and_charlie):
-#     """
-#     5042 is listed by bob
-#     793 is minted to bob
-#     0 is minted to charlie
-#     1 is minted to charlie
-#     """
-#     artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
-
-#     BID_CHARLIE = to_uint(5000)
-#     BID_ALICE = to_uint(10000)
-
-#     token_id = TOKENS_BOB[0]
-
-#     await signer.send_transaction(
-#         charlie,
-#         dai.contract_address,
-#         "approve",
-#         [artpedia.contract_address, *BID_CHARLIE],
-#     )
-
-#     await assert_revert(
-#         signer.send_transaction(
-#             bob,
-#             artpedia.contract_address,
-#             "accept_bid",
-#             [
-#                 tubbycats.contract_address,
-#                 *token_id,
-#                 dai.contract_address,
-#                 *BID_ALICE,
-#                 alice.contract_address,
-#                 len(DATA),
-#                 *DATA,
-#             ],
-#         ),
-#         reverted_with="ArtpediaExchange: no bid for this token_id",
-#     )
-
-#     await assert_revert(
-#         signer.send_transaction(
-#             bob,
-#             artpedia.contract_address,
-#             "accept_bid",
-#             [
-#                 tubbycats.contract_address,
-#                 *token_id,
-#                 dai.contract_address,
-#                 *BID_CHARLIE,
-#                 charlie.contract_address,
-#                 len(DATA),
-#                 *DATA,
-#             ],
-#         ),
-#         reverted_with="ArtpediaExchange: no bid for this token_id",
-#     )
+    await assert_revert(
+        signer.send_transaction(
+            charlie,
+            artpedia.contract_address,
+            "accept_bid",
+            [
+                tubbycats.contract_address,
+                *token_id,
+                dai.contract_address,
+                *BID_ALICE,
+                alice.contract_address,
+                len(DATA),
+                *DATA,
+            ],
+        ),
+        reverted_with="ArtpediaExchange: caller is not owner nor operators",
+    )
 
 
-# @pytest.mark.asyncio
-# async def test_negative_bid_frontrunning_detected(send_dai_to_bob_and_charlie):
-#     """
-#     5042 is listed by bob
-#     793 is minted to bob
-#     0 is minted to charlie
-#     1 is minted to charlie
-#     """
-#     artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
+@pytest.mark.asyncio
+async def test_negative_assert_bid_exists(send_dai_to_bob_and_charlie):
+    """
+    5042 is listed by bob
+    793 is minted to bob
+    0 is minted to charlie
+    1 is minted to charlie
+    """
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
 
-#     BID_CHARLIE = to_uint(5000)
-#     BID_ALICE = to_uint(10000)
+    BID_CHARLIE = to_uint(5000)
+    BID_ALICE = to_uint(10000)
 
-#     token_id = TOKENS_BOB[0]
+    token_id = TOKENS_BOB[0]
 
-#     await signer.send_transaction(
-#         charlie,
-#         dai.contract_address,
-#         "approve",
-#         [artpedia.contract_address, *BID_CHARLIE],
-#     )
+    await signer.send_transaction(
+        charlie,
+        dai.contract_address,
+        "approve",
+        [artpedia.contract_address, *BID_CHARLIE],
+    )
 
-#     await signer.send_transaction(
-#         charlie,
-#         artpedia.contract_address,
-#         "bid",
-#         [
-#             tubbycats.contract_address,
-#             *token_id,
-#             dai.contract_address,
-#             *BID_CHARLIE,
-#             QUARTER_HOUR,
-#         ],
-#     )
+    await assert_revert(
+        signer.send_transaction(
+            bob,
+            artpedia.contract_address,
+            "accept_bid",
+            [
+                tubbycats.contract_address,
+                *token_id,
+                dai.contract_address,
+                *BID_ALICE,
+                alice.contract_address,
+                len(DATA),
+                *DATA,
+            ],
+        ),
+        reverted_with="ArtpediaExchange: no bid for this token_id",
+    )
 
-#     await signer.send_transaction(
-#         alice, dai.contract_address, "approve", [artpedia.contract_address, *BID_ALICE]
-#     )
-
-#     # alice bid 2 times, overriding the second bid with lower amount after accept_bid had been sent to the mempool
-#     # for the sake of simplicity, only the second bid is included in the test
-#     BID_ALICE = to_uint(100)
-
-#     await signer.send_transaction(
-#         alice,
-#         artpedia.contract_address,
-#         "bid",
-#         [
-#             tubbycats.contract_address,
-#             *token_id,
-#             dai.contract_address,
-#             *BID_ALICE,
-#             QUARTER_HOUR,
-#         ],
-#     )
-
-#     # this was sent before alice changed the bid to 100
-#     BID_ALICE = to_uint(10000)
-
-#     await assert_revert(
-#         signer.send_transaction(
-#             bob,
-#             artpedia.contract_address,
-#             "accept_bid",
-#             [
-#                 tubbycats.contract_address,
-#                 *token_id,
-#                 dai.contract_address,
-#                 *BID_ALICE,
-#                 alice.contract_address,
-#                 len(DATA),
-#                 *DATA,
-#             ],
-#         ),
-#         reverted_with="ArtpediaExchange: bid frontrunning detected",
-#     )
+    await assert_revert(
+        signer.send_transaction(
+            bob,
+            artpedia.contract_address,
+            "accept_bid",
+            [
+                tubbycats.contract_address,
+                *token_id,
+                dai.contract_address,
+                *BID_CHARLIE,
+                charlie.contract_address,
+                len(DATA),
+                *DATA,
+            ],
+        ),
+        reverted_with="ArtpediaExchange: no bid for this token_id",
+    )
 
 
-# @pytest.mark.asyncio
-# async def test_negative_exchange_is_not_approved_for_erc721_transfer(
-#     send_dai_to_bob_and_charlie,
-# ):
-#     """
-#     5042 is listed by bob
-#     793 is minted to bob
-#     0 is minted to charlie
-#     1 is minted to charlie
-#     """
-#     artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
+@pytest.mark.asyncio
+async def test_negative_bid_frontrunning_detected(send_dai_to_bob_and_charlie):
+    """
+    5042 is listed by bob
+    793 is minted to bob
+    0 is minted to charlie
+    1 is minted to charlie
+    """
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
 
-#     token_id = TOKENS_BOB[1]
+    BID_CHARLIE = to_uint(5000)
+    BID_ALICE = to_uint(10000)
 
-#     BID_CHARLIE = to_uint(10000)
-#     await signer.send_transaction(
-#         charlie,
-#         dai.contract_address,
-#         "approve",
-#         [artpedia.contract_address, *BID_CHARLIE],
-#     )
+    token_id = TOKENS_BOB[0]
 
-#     await signer.send_transaction(
-#         charlie,
-#         artpedia.contract_address,
-#         "bid",
-#         [
-#             tubbycats.contract_address,
-#             *token_id,
-#             dai.contract_address,
-#             *BID_CHARLIE,
-#             QUARTER_HOUR,
-#         ],
-#     )
+    await signer.send_transaction(
+        charlie,
+        dai.contract_address,
+        "approve",
+        [artpedia.contract_address, *BID_CHARLIE],
+    )
 
-#     BID_ALICE = to_uint(5000)
-#     await signer.send_transaction(
-#         alice, dai.contract_address, "approve", [artpedia.contract_address, *BID_ALICE]
-#     )
+    await signer.send_transaction(
+        charlie,
+        artpedia.contract_address,
+        "bid",
+        [
+            tubbycats.contract_address,
+            *token_id,
+            dai.contract_address,
+            *BID_CHARLIE,
+            QUARTER_HOUR,
+        ],
+    )
 
-#     await signer.send_transaction(
-#         alice,
-#         artpedia.contract_address,
-#         "bid",
-#         [
-#             tubbycats.contract_address,
-#             *token_id,
-#             dai.contract_address,
-#             *BID_ALICE,
-#             QUARTER_HOUR,
-#         ],
-#     )
+    await signer.send_transaction(
+        alice, dai.contract_address, "approve", [artpedia.contract_address, *BID_ALICE]
+    )
 
-#     await assert_revert(
-#         signer.send_transaction(
-#             bob,
-#             artpedia.contract_address,
-#             "accept_bid",
-#             [
-#                 tubbycats.contract_address,
-#                 *token_id,
-#                 dai.contract_address,
-#                 *BID_CHARLIE,
-#                 charlie.contract_address,
-#                 len(DATA),
-#                 *DATA,
-#             ],
-#         ),
-#         reverted_with="ERC721: either is not approved or the caller is the zero address",
-#     )
+    # alice bid 2 times, overriding the second bid with lower amount after accept_bid had been sent to the mempool
+    # for the sake of simplicity, only the second bid is included in the test
+    BID_ALICE = to_uint(100)
 
+    await signer.send_transaction(
+        alice,
+        artpedia.contract_address,
+        "bid",
+        [
+            tubbycats.contract_address,
+            *token_id,
+            dai.contract_address,
+            *BID_ALICE,
+            QUARTER_HOUR,
+        ],
+    )
 
-# @pytest.mark.asyncio
-# async def test_positive_accept_maxbid_listed_item_by_owner(send_dai_to_bob_and_charlie):
-#     """
-#     5042 is listed by bob
-#     793 is minted to bob
-#     0 is minted to charlie
-#     1 is minted to charlie
-#     """
-#     artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
+    # this was sent before alice changed the bid to 100
+    BID_ALICE = to_uint(10000)
 
-#     BID_CHARLIE = to_uint(5000)
-#     BID_ALICE = to_uint(10000)
-
-#     token_id = TOKENS_BOB[0]
-
-#     await signer.send_transaction(
-#         charlie,
-#         dai.contract_address,
-#         "approve",
-#         [artpedia.contract_address, *BID_CHARLIE],
-#     )
-
-#     await signer.send_transaction(
-#         charlie,
-#         artpedia.contract_address,
-#         "bid",
-#         [
-#             tubbycats.contract_address,
-#             *token_id,
-#             dai.contract_address,
-#             *BID_CHARLIE,
-#             QUARTER_HOUR,
-#         ],
-#     )
-
-#     await signer.send_transaction(
-#         alice, dai.contract_address, "approve", [artpedia.contract_address, *BID_ALICE]
-#     )
-
-#     await signer.send_transaction(
-#         alice,
-#         artpedia.contract_address,
-#         "bid",
-#         [
-#             tubbycats.contract_address,
-#             *token_id,
-#             dai.contract_address,
-#             *BID_ALICE,
-#             QUARTER_HOUR,
-#         ],
-#     )
-
-#     response = await signer.send_transaction(
-#         bob,
-#         artpedia.contract_address,
-#         "accept_bid",
-#         [
-#             tubbycats.contract_address,
-#             *token_id,
-#             dai.contract_address,
-#             *BID_ALICE,
-#             alice.contract_address,
-#             len(DATA),
-#             *DATA,
-#         ],
-#     )
-
-#     assert_event_emitted(
-#         response,
-#         from_address=artpedia.contract_address,
-#         name="OrdersMatched",
-#         data=[
-#             alice.contract_address,
-#             bob.contract_address,
-#             tubbycats.contract_address,
-#             *token_id,
-#             dai.contract_address,
-#             *BID_ALICE,
-#         ],
-#     )
+    await assert_revert(
+        signer.send_transaction(
+            bob,
+            artpedia.contract_address,
+            "accept_bid",
+            [
+                tubbycats.contract_address,
+                *token_id,
+                dai.contract_address,
+                *BID_ALICE,
+                alice.contract_address,
+                len(DATA),
+                *DATA,
+            ],
+        ),
+        reverted_with="ArtpediaExchange: bid frontrunning detected",
+    )
 
 
-# @pytest.mark.asyncio
-# async def test_positive_accept_maxbid_listed_item_by_operator(
-#     send_dai_to_bob_and_charlie,
-# ):
-#     """
-#     5042 is listed by bob
-#     793 is minted to bob
-#     0 is minted to charlie
-#     1 is minted to charlie
-#     """
-#     # TODO
+@pytest.mark.asyncio
+async def test_negative_exchange_is_not_approved_for_erc721_transfer(
+    send_dai_to_bob_and_charlie,
+):
+    """
+    5042 is listed by bob
+    793 is minted to bob
+    0 is minted to charlie
+    1 is minted to charlie
+    """
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
+
+    token_id = TOKENS_BOB[1]
+
+    BID_CHARLIE = to_uint(10000)
+    await signer.send_transaction(
+        charlie,
+        dai.contract_address,
+        "approve",
+        [artpedia.contract_address, *BID_CHARLIE],
+    )
+
+    await signer.send_transaction(
+        charlie,
+        artpedia.contract_address,
+        "bid",
+        [
+            tubbycats.contract_address,
+            *token_id,
+            dai.contract_address,
+            *BID_CHARLIE,
+            QUARTER_HOUR,
+        ],
+    )
+
+    BID_ALICE = to_uint(5000)
+    await signer.send_transaction(
+        alice, dai.contract_address, "approve", [artpedia.contract_address, *BID_ALICE]
+    )
+
+    await signer.send_transaction(
+        alice,
+        artpedia.contract_address,
+        "bid",
+        [
+            tubbycats.contract_address,
+            *token_id,
+            dai.contract_address,
+            *BID_ALICE,
+            QUARTER_HOUR,
+        ],
+    )
+
+    await assert_revert(
+        signer.send_transaction(
+            bob,
+            artpedia.contract_address,
+            "accept_bid",
+            [
+                tubbycats.contract_address,
+                *token_id,
+                dai.contract_address,
+                *BID_CHARLIE,
+                charlie.contract_address,
+                len(DATA),
+                *DATA,
+            ],
+        ),
+        reverted_with="ERC721: either is not approved or the caller is the zero address",
+    )
+
+
+@pytest.mark.asyncio
+async def test_positive_accept_maxbid_listed_item_by_owner(send_dai_to_bob_and_charlie):
+    """
+    5042 is listed by bob
+    793 is minted to bob
+    0 is minted to charlie
+    1 is minted to charlie
+    """
+    artpedia, tubbycats, dai, ust, alice, bob, charlie = send_dai_to_bob_and_charlie
+
+    BID_CHARLIE = to_uint(5000)
+    BID_ALICE = to_uint(10000)
+
+    token_id = TOKENS_BOB[0]
+
+    await signer.send_transaction(
+        charlie,
+        dai.contract_address,
+        "approve",
+        [artpedia.contract_address, *BID_CHARLIE],
+    )
+
+    await signer.send_transaction(
+        charlie,
+        artpedia.contract_address,
+        "bid",
+        [
+            tubbycats.contract_address,
+            *token_id,
+            dai.contract_address,
+            *BID_CHARLIE,
+            QUARTER_HOUR,
+        ],
+    )
+
+    await signer.send_transaction(
+        alice, dai.contract_address, "approve", [artpedia.contract_address, *BID_ALICE]
+    )
+
+    await signer.send_transaction(
+        alice,
+        artpedia.contract_address,
+        "bid",
+        [
+            tubbycats.contract_address,
+            *token_id,
+            dai.contract_address,
+            *BID_ALICE,
+            QUARTER_HOUR,
+        ],
+    )
+
+    response = await signer.send_transaction(
+        bob,
+        artpedia.contract_address,
+        "accept_bid",
+        [
+            tubbycats.contract_address,
+            *token_id,
+            dai.contract_address,
+            *BID_ALICE,
+            alice.contract_address,
+            len(DATA),
+            *DATA,
+        ],
+    )
+
+    assert_event_emitted(
+        response,
+        from_address=artpedia.contract_address,
+        name="OrdersMatched",
+        data=[
+            alice.contract_address,
+            bob.contract_address,
+            tubbycats.contract_address,
+            *token_id,
+            dai.contract_address,
+            *BID_ALICE,
+        ],
+    )
+
+
+@pytest.mark.asyncio
+async def test_positive_accept_maxbid_listed_item_by_operator(
+    send_dai_to_bob_and_charlie,
+):
+    """
+    5042 is listed by bob
+    793 is minted to bob
+    0 is minted to charlie
+    1 is minted to charlie
+    """
+    # TODO
 
 
 @pytest.mark.asyncio
